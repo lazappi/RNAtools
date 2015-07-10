@@ -10,3 +10,5 @@ License: Simplified BSD
 LazyData: true
 URL: http://github.com/lazappi/lazappiRNA
 BugReports: http://github.com/lazappi/lazappiRNA/issues
+Suggests: knitr
+VignetteBuilder: knitr

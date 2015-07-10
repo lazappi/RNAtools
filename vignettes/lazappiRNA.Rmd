@@ -1,0 +1,34 @@
+---
+title: "lazappiRNA"
+author: "Luke Zappia"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{lazappiRNA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Welcome!
+========
+
+Welcome to lazappiRNA! Many studies across the life science now make use of
+RNA-seq to investigate gene products. These experiments can provide high-quality
+measurements of gene expression across a wide dynamic range, and in contrast to
+microarracy experiments do not require probes to be designed for specific
+regions.
+
+Perhaps the most common analysis pipeline for RNA-seq data is to perform
+quality control, align reads to a reference genome, summarise reads against a
+known annotation and perform differential expression testing. The aim of this
+process is to identify genes or transcripts that have significantly different 
+activity levels under some treatment condition (disease, drug, knockout, 
+environment...) compared to a control. Further analysis attempts to investigate 
+the biological implications of these changes in regulation.
+
+Multiple methods exist for each of these steps. This package takes a matrix of
+summarised counts for a group of samples and provides a unified interface for
+differential expression testing (using edgeR, DESeq, DESeq2 and limma-voom) and
+functional analysis. The aim is allow simultaneous analysis using multiple
+packages including robust quality control, easily comparable visulisations and
+combination of results.
