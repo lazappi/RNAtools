@@ -132,6 +132,7 @@ rlogTransform <- function(data) {
 #' @export
 cpmTransform <- function(data) {
 
+    data <- edgeR::DEGList(data)
     transformed <- edgeR::cpm(data)
 
     return(transformed)
@@ -149,6 +150,7 @@ cpmTransform <- function(data) {
 #' @export
 logCPMTransform <- function(data) {
 
+    data <- edgeR::DEGList(data)
     transformed <- edgeR::cpm(data, log = TRUE)
 
     return(transformed)
