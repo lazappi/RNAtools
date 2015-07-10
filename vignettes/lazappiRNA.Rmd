@@ -90,3 +90,10 @@ head(counts)
 The matrix of counts and factor specifying the group of each sample are going
 to be the main input for our analysis.
 
+Session Info
+============
+
+```{r sessionInfo}
+sessionInfo()
+```
+
