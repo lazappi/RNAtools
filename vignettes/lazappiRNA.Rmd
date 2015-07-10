@@ -9,6 +9,33 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r global_options, include = FALSE}
+# Default RMarkdown options
+# Changing these will change them for all chunks unless otherwise set
+knitr::opts_chunk$set(
+                        autodep        = TRUE,
+                        cache          = FALSE,
+                        cache.comments = TRUE,
+                        collapse       = TRUE,
+                        comment        = "##",
+                        #dev            = "png",
+                        echo           = TRUE,
+                        error          = FALSE,
+                        fig.width      = 14,
+                        fig.height     = 8,
+                        highlight      = TRUE,
+                        include        = TRUE,
+                        message        = FALSE,
+                        prompt         = FALSE,
+                        results        = "markup",
+                        size           = "normalsize",
+                        strip.white    = TRUE,
+                        tidy           = FALSE,
+                        tidy.opts      = NULL,
+                        warning        = FALSE
+               )
+```
+
 Welcome!
 ========
 
@@ -32,3 +59,34 @@ differential expression testing (using edgeR, DESeq, DESeq2 and limma-voom) and
 functional analysis. The aim is allow simultaneous analysis using multiple
 packages including robust quality control, easily comparable visulisations and
 combination of results.
+
+Data
+====
+
+For this vignette we are going to make use of data from Sultan et al. availble
+from the _HTSFilter_ package. This dataset contains two biological replicates
+from a human embryonic kidney and B cell line. The raw read count and phenotype
+table are available as part of the ReCount online resource.
+
+To start we load the _HTSFilter_ package and attach the data in `sultan`. Other
+information is available but we are just interested in the matrix of counts and
+the groups:
+
+```{r data}
+library(HTSFilter)
+
+data("sultan")
+
+counts <- exprs(sultan)
+groups <- pData(sultan)$cell.line
+
+rm(sultan)
+
+groups
+
+head(counts)
+```
+
+The matrix of counts and factor specifying the group of each sample are going
+to be the main input for our analysis.
+
