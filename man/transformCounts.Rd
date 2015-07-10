@@ -4,18 +4,20 @@
 \alias{transformCounts}
 \title{Transform counts}
 \usage{
-transformCounts(data, methods = c("log", "vst", "rlog", "cpm"))
+transformCounts(data, methods, verbose = TRUE)
 }
 \arguments{
 \item{data}{Matrix of raw counts}
 
 \item{methods}{Vector of transformation methods to apply, choices are "log",
-               "vst", "rlog" and "cpm".}
+"vst", "rlog" and "cpm".}
+
+\item{verbose}{Boolean, whether to print messages showing progress}
 }
 \value{
 List of transformed matrices
 }
 \description{
-Apply transformations to rawcounts for applications such as plotting
+Apply transformations to raw counts for applications such as plotting
 }
 
