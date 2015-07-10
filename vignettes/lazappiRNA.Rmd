@@ -90,6 +90,36 @@ head(counts)
 The matrix of counts and factor specifying the group of each sample are going
 to be the main input for our analysis.
 
+Exploration
+===========
+
+Before starting our analysis we should begin by exploring our data. This allows
+us to spot anything that is obviously wrong and provides a baseline we can make
+comparisons to later. Let's first look at a single sample, SRX008333.
+
+```{r count-dist, capion = "Distribution of counts for the sample SRX008333"}
+library(ggplot2)
+
+ggplot(data.frame(counts), aes(x = SRX008333)) + geom_histogram(binwidth = 20)
+```
+
+Here we can see that the distribution is both over a large range and heavily
+skewed towards low values. For this reason transformed version of counts are
+commonly used for plotting, such as: $x = x + 1$
+
+$$ x + 1 $$
+
+$$
+\begin{aligned}
+    y = log_2(K + 1)
+\end{aligned}
+$$
+
+More sophisted transformations are provided by the differential expression
+packages such as the Variance Stabilising Transformation (_DESeq_),
+regularised-log (_DESeq2_) and log Counts Per Million (_edgeR_). lazappiRNA
+is capable of performing each of these.
+
 Session Info
 ============
 
