@@ -60,21 +60,32 @@ functional analysis. The aim is allow simultaneous analysis using multiple
 packages including robust quality control, easily comparable visulisations and
 combination of results.
 
+Before we get started let's load some packages we will need:
+
+```{r libraries}
+library(lazappiRNA)
+
+# Plotting
+library(ggplot2)
+
+# RNA-seq
+library(HTSFilter)
+```
+
+
 Data
 ====
 
-For this vignette we are going to make use of data from Sultan et al. availble
+For this vignette we are going to make use of data from Sultan et al. available
 from the _HTSFilter_ package. This dataset contains two biological replicates
 from a human embryonic kidney and B cell line. The raw read count and phenotype
 table are available as part of the ReCount online resource.
 
-To start we load the _HTSFilter_ package and attach the data in `sultan`. Other
-information is available but we are just interested in the matrix of counts and
-the groups:
+We have alread load _HTSFilter_ so we can start by attaching the data in 
+`sultan`. Other information is available but we are just interested in the 
+matrix of counts and the groups for each sample:
 
 ```{r data}
-library(HTSFilter)
-
 data("sultan")
 
 counts <- exprs(sultan)
@@ -98,8 +109,6 @@ us to spot anything that is obviously wrong and provides a baseline we can make
 comparisons to later. Let's first look at a single sample, SRX008333.
 
 ```{r count-dist, capion = "Distribution of counts for the sample SRX008333"}
-library(ggplot2)
-
 ggplot(data.frame(counts), aes(x = SRX008333)) + geom_histogram(binwidth = 20)
 ```
 
@@ -119,6 +128,11 @@ More sophisted transformations are provided by the differential expression
 packages such as the Variance Stabilising Transformation (_DESeq_),
 regularised-log (_DESeq2_) and log Counts Per Million (_edgeR_). lazappiRNA
 is capable of performing each of these.
+
+```{r transform}
+transformed <- transformCounts(counts,
+                               methods = c("log", "vst", "rlog", "logCPM"))
+```
 
 Session Info
 ============
