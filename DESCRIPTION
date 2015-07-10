@@ -1,5 +1,5 @@
 Package: lazappiRNA
-Title: Functions for processing RNA-seq data used in my Masters research project
+Title: lazappiRNA - Functions for processing RNA-seq data
 Version: 0.0.0.9000
 Authors@R: person("Luke", "Zappia", email = "luke.zappia@gmail.com",
                   role = c("aut", "cre"))
@@ -8,3 +8,5 @@ Description: Functions for processing RNA-seq data used in my Masters research
 Depends: R (>= 3.2.1)
 License: Simplified BSD
 LazyData: true
+URL: http://github.com/lazappi/lazappiRNA
+BugReports: http://github.com/lazappi/lazappiRNA/issues
