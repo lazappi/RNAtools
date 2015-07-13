@@ -17,4 +17,5 @@ Imports: DESeq,
     edgeR,
     dplyr,
     tidyr,
-    magrittr
+    magrittr,
+    ggplot2
