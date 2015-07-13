@@ -159,6 +159,20 @@ names(densities)
 densities[["combined"]]
 ```
 
+Similar function exist for producing boxplots.
+
+```{r boxplots}
+boxplots <- listBoxplots(transformed)
+
+boxplots["combined"]
+```
+
+Both sets of plots can be helpful for exploring a dataset. The boxplots clearly
+show the expression quartiles and the presence of outlier genes. The density
+plots give more detail about the distribution, for example showing any
+bi-modality. It is also possible to see the effect of _DESeq2's_ regularised 
+log transformation as it removes the peak at lower expression levels.
+
 Session Info
 ============
 
