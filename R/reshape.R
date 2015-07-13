@@ -13,8 +13,8 @@ lengthenMatrix <- function(data) {
 
     long <- data %>%
             data.frame %>%
-            dplyr::mutate(row = rownames(data)) %>%
-            tidyr::gather(key = row, "value", -row) %>%
+            dplyr::add_rownames() %>%
+            tidyr::gather(key = rowname, "value", -rowname) %>%
             magrittr::set_colnames(c("row", "col", "value"))
 
     return(long)
@@ -27,19 +27,22 @@ lengthenMatrix <- function(data) {
 #' format data.frame
 #'
 #' @param data.list List of matrices to combine
+#' @param lengthen  Boolean, whether to apply lengthenMatrix before combining
 #'
 #' @return Long format data.frame of combined matrices
 #'
 #' @export
-combineMatrices <- function(data.list) {
+combineMatrices <- function(data.list, lengthen = TRUE) {
 
-    long.list <- lapply(data.list, lengthenMatrix)
-
-    for(name in names(long.list)) {
-        long.list[[name]]$matrix <- rep(name, nrow(long.list[[name]]))
+    if (lengthen) {
+        data.list <- lapply(data.list, lengthenMatrix)
     }
 
-    combined <- do.call(rbind, long.list)
+    for(name in names(data.list)) {
+        data.list[[name]]$matrix <- rep(name, nrow(data.list[[name]]))
+    }
+
+    combined <- do.call(rbind, data.list)
 
     return(combined)
 }
