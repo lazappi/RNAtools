@@ -4,10 +4,12 @@
 \alias{combineMatrices}
 \title{Combine Matrices}
 \usage{
-combineMatrices(data.list)
+combineMatrices(data.list, lengthen = TRUE)
 }
 \arguments{
 \item{data.list}{List of matrices to combine}
+
+\item{lengthen}{Boolean, whether to apply lengthenMatrix before combining}
 }
 \value{
 Long format data.frame of combined matrices
