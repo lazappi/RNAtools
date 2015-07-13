@@ -45,7 +45,7 @@ listDensity <- function(data.list) {
           magrittr::set_colnames(c("Gene", "Sample", "Counts", "Set")) %>%
           ggplot2::ggplot(aes(x = Counts, fill = Sample, colour = Sample)) +
           ggplot2::geom_density(alpha = 0.3) +
-          ggplot2::facet_wrap(~ Set) +
+          ggplot2::facet_wrap(~ Set)
 
     plots[["combined"]] <- gg
 
