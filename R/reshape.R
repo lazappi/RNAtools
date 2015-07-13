@@ -19,3 +19,28 @@ lengthenMatrix <- function(data) {
 
     return(long)
 }
+
+
+#' Combine Matrices
+#'
+#' Combine a list of matrices with the same number of columns into a single long
+#' format data.frame
+#'
+#' @param data.list List of matrices to combine
+#'
+#' @return Long format data.frame of combined matrices
+#'
+#' @export
+combineMatrices <- function(data.list) {
+
+    long.list <- lapply(data.list, lengthenMatrix)
+
+    for(name in names(long.list)) {
+        long.list[[name]]$matrix <- rep(name, nrow(long.list[[name]]))
+    }
+
+    combined <- do.call(rbind, long.list)
+
+    return(combined)
+}
+
