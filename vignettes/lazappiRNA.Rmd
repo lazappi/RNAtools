@@ -173,6 +173,30 @@ plots give more detail about the distribution, for example showing any
 bi-modality. It is also possible to see the effect of _DESeq2's_ regularised 
 log transformation as it removes the peak at lower expression levels.
 
+Pairwise MA plots show the difference in expression for genes in two samples
+compared to the average expression of the two samples.
+
+```{r ma-plots}
+ma.plots <- listMA(transformed)
+
+ma.plots[["combined"]]
+```
+
+Here we can see the reproducability between samples and whether normalisation
+is needed. Genes that are similar in the two samples appear around the $y = 0$
+line (blue) and a lowess fit (red) shows trends in bias related to mean
+expression.
+
+With more samples the numbers of these plot grows quickly and it may be more
+useful to select a single transformation or some samples of interest.
+
+```{r single-ma}
+countMA(transformed[["log"]])
+```
+
+For this dataset the results look pretty good. The plot are centered around
+$y = 0$ and the samples from the same cell-types have reduced variance.
+
 Session Info
 ============
 
