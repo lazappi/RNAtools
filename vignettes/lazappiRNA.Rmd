@@ -105,10 +105,18 @@ Exploration
 
 Before starting our analysis we should begin by exploring our data. This allows
 us to spot anything that is obviously wrong and provides a baseline we can make
-comparisons to later. Let's first look at a single sample, SRX008333.
+comparisons to later. Let's have a look a the count density.
 
-```{r count-dist, capion = "Distribution of counts for the sample SRX008333"}
-ggplot(data.frame(counts), aes(x = SRX008333)) + geom_histogram(binwidth = 20)
+```{r count-density}
+countDensity(counts)
+```
+
+All of the plotting function in lazappiRNA return _ggplot2_ objects. These can
+be easily modified, for example if we prefer the black and white theme and 
+would like a title:
+
+```{r count-density-bw}
+countDensity(counts) + theme_bw() + ggtitle("Count Densities")
 ```
 
 Here we can see that the distribution is both over a large range and heavily
@@ -131,6 +139,24 @@ is capable of performing each of these.
 ```{r transform}
 transformed <- transformCounts(counts,
                                methods = c("log", "vst", "rlog", "logCPM"))
+
+names(transformed)
+
+head(transformed[["log"]])
+```
+
+The result of this function is a list of matrices where each is transformed
+using one of the specifed methods. We can now use the `listDensity` function
+to plot each of these. Again the result is a list but now each item is a 
+_ggplot2_ object containing a density plot. An additional item has been added
+which holds the combined plot.
+
+```{r densities}
+densities <- listDensity(transformed)
+
+names(densities)
+
+densities[["combined"]]
 ```
 
 Session Info
