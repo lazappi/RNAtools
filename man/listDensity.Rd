@@ -13,6 +13,6 @@ listDensity(data.list)
 List of ggplot2 object containing histograms
 }
 \description{
-Plot densnities from a list of matrices
+Plot densities from a list of matrices
 }
 

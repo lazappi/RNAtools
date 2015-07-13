@@ -1,10 +1,12 @@
 #' List Density
 #'
-#' Plot densnities from a list of matrices
+#' Plot densities from a list of matrices
 #'
 #' @param data.list List of matrices to plot
 #'
 #' @return List of ggplot2 object containing histograms
+#'
+#' @importFrom magrittr "%>%"
 #'
 #' @export
 listDensity <- function(data.list) {
@@ -37,6 +39,15 @@ listDensity <- function(data.list) {
 
         plots[[name]] <- gg
     }
+
+    gg <- data.list %>%
+          combineMatrices %>%
+          magrittr::set_colnames(c("Gene", "Sample", "Counts", "Set")) %>%
+          ggplot2::ggplot(aes(x = Counts, fill = Sample, colour = Sample)) +
+          ggplot2::geom_density(alpha = 0.3) +
+          ggplot2::facet_wrap(~ Set)
+
+    plots[["combined"]] <- gg
 
     return(plots)
 }
