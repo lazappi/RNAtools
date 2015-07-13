@@ -14,4 +14,7 @@ Suggests: knitr
 VignetteBuilder: knitr
 Imports: DESeq,
     DESeq2,
-    edgeR
+    edgeR,
+    dplyr,
+    tidyr,
+    magrittr
