@@ -8,22 +8,12 @@
 #' @return ggplot2 object containing the dendrogram
 heatmapDendro <- function(data, rows = TRUE) {
 
-    gg <- ggplot2::ggplot() +
-          ggplot2::geom_segment(data = ggdendro::segment(data),
-                                ggplot2::aes(x = x, y = y,
-                                             xend = xend, yend = yend)) +
-          ggplot2::labs(x = NULL, y = NULL) +
-          ggdendro::theme_dendro()
-
     if (rows) {
-        gg <- gg +
-              ggplot2::scale_x_continuous(
-                                  expand = c(0.5 / length(data$labels$x), 0)) +
-              ggplot2::coord_flip()
+        gg <- ggdendro::ggdendrogram(data, labels = FALSE, rotate = TRUE) +
+              ggplot2::theme(axis.text.x = ggplot2::element_blank())
     } else {
-        gg <- gg +
-              ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
-                                                                 hjust = 1))
+        gg <- ggdendro::ggdendrogram(data, labels = FALSE, rotate = FALSE) +
+              ggplot2::theme(axis.text.y = ggplot2::element_blank())
     }
 
     return(gg)
@@ -62,8 +52,6 @@ makeHeatmap <- function(data, dist.mat = FALSE) {
     row.plot <- heatmapDendro(row.dendro, rows = TRUE) +
                 ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
     col.plot <- heatmapDendro(col.dendro, rows = FALSE) +
-                ggplot2::scale_x_continuous(breaks = 1:ncol(data),
-                                            labels = col.dendro$labels$label) +
                 ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
 
     row.ord <- match(row.dendro$labels$label, rownames(data))
@@ -83,9 +71,6 @@ makeHeatmap <- function(data, dist.mat = FALSE) {
     gg <- ggplot2::ggplot(plot.data, ggplot2::aes(row, col)) +
           ggplot2::geom_tile(ggplot2::aes(fill = value), colour = "white") +
           ggplot2::scale_fill_gradientn(colours = colours) +
-          ggplot2::labs(x = NULL, y = NULL) +
-          #ggplot2::scale_x_continuous(expand = c(0, 0) +
-          #ggplot2::scale_y_continuous(expand = c(0, 0), breaks = NULL) +
           ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
 
     plot.list <- list(col = col.plot, row = row.plot, centre = gg)
