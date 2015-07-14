@@ -1,3 +1,23 @@
+#' Count heatmap
+#'
+#' Produce a clustered heatmap from a count matrix
+#'
+#' @param data Matrix to produce the heatmap from
+#'
+#' @return List counting elements of heatmap
+#'
+#' @export
+countHeatmap <- function(data, groups = colnames(data)) {
+
+    dists <- as.matrix(dist(t(data)))
+    colnames(dists) <- groups
+
+    heatmap <- makeHeatmap(dists, dist.mat = TRUE)
+
+    return(heatmap)
+
+}
+
 #' Heatmap Dendrogram
 #'
 #' Produce a dendrogram for a heatmap using ggplot2 and ggdendro
@@ -55,7 +75,11 @@ makeHeatmap <- function(data, dist.mat = FALSE) {
                 ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
 
     row.ord <- match(row.dendro$labels$label, rownames(data))
-    col.ord <- match(col.dendro$labels$label, colnames(data))
+    if (dist.mat) {
+        col.ord <- row.ord
+    } else {
+        col.ord <- match(col.dendro$labels$label, colnames(data))
+    }
 
     plot.data <- data %>%
                  data.frame %>%

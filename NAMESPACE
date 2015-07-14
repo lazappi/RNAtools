@@ -3,6 +3,7 @@
 export(combineMatrices)
 export(countBoxplots)
 export(countDensity)
+export(countHeatmap)
 export(countMA)
 export(cpmTransform)
 export(lengthenMatrix)
