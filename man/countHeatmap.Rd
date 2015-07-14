@@ -8,6 +8,8 @@ countHeatmap(data, groups = colnames(data))
 }
 \arguments{
 \item{data}{Matrix to produce the heatmap from}
+
+\item{groups}{Vector of groups for samples}
 }
 \value{
 List counting elements of heatmap

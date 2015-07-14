@@ -1,8 +1,33 @@
+#' List Heatmaps
+#'
+#' Consturct heatmaps from a list of matrices
+#'
+#' @param data.list List of matrices to plot
+#' @param groups Vector of groups for samples
+#'
+#' @return List of lists containing objects for heatmaps
+#'
+#' @export
+listHeatmaps <- function(data.list, groups = colnames(data.list[[1]])) {
+
+    plots <- list()
+
+    for (name in names(data.list)) {
+
+        heatmap <- countHeatmap(data.list[[name]], groups = groups)
+
+        plots[[name]] <- heatmap
+    }
+
+    return(plots)
+}
+
 #' Count heatmap
 #'
 #' Produce a clustered heatmap from a count matrix
 #'
 #' @param data Matrix to produce the heatmap from
+#' @param groups Vector of groups for samples
 #'
 #' @return List counting elements of heatmap
 #'
