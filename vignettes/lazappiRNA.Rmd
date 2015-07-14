@@ -197,6 +197,22 @@ countMA(transformed[["log"]])
 For this dataset the results look pretty good. The plot are centered around
 $y = 0$ and the samples from the same cell-types have reduced variance.
 
+To explore the similarites and dissimilarities between samples looking at a
+clustered heatmap of the between sample distances can be helpful. The
+`countHeatmap` function (and the related `listHeatmaps`) can be used to produce
+these plots. By providing the vector of groups these can be included as labels
+on the y-axis. As dendrograms indicating the clustering are included the result
+is a list of _ggplot2_ objects instead of a single plot. The `showHeatmap`
+function can assemble these into a single image.
+
+```{r heatmaps}
+heatmap <- countHeatmap(transformed$log, groups = groups)
+
+names(heatmap)
+
+showHeatmap(heatmap)
+```
+
 Session Info
 ============
 
