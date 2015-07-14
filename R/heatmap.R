@@ -1,101 +1,145 @@
+#' Heatmap Dendrogram
+#'
+#' Produce a dendrogram for a heatmap using ggplot2 and ggdendro
+#'
+#' @param data Dendrogram data to plot
+#' @param rows Boolean, whether the plot is for rows
+#'
+#' @return ggplot2 object containing the dendrogram
+heatmapDendro <- function(data, rows = TRUE) {
 
-
-dendroPlot <- function(data, rows = TRUE, labels = TRUE) {
-
-    # y.range <- range(data$segments$y)
-    # y.diff  <- y.range[2] - y.range[1]
-    # n.char  <- max(nchar(as.character(data$labels$label)))
-    # angle   <- if (rows) {0} else {90}
-
-    gg <- ggplot() +
-          geom_segment(data = segment(data),
-                       aes(x = x, y = y, xend = xend, yend = yend)) +
-          labs(x = NULL, y = NULL) +
-          theme_dendro()
+    gg <- ggplot2::ggplot() +
+          ggplot2::geom_segment(data = ggdendro::segment(data),
+                                ggplot2::aes(x = x, y = y,
+                                             xend = xend, yend = yend)) +
+          ggplot2::labs(x = NULL, y = NULL) +
+          ggdendro::theme_dendro()
 
     if (rows) {
         gg <- gg +
-              scale_x_continuous(expand = c(0.5 / length(data$labels$x), 0)) +
-              coord_flip()
+              ggplot2::scale_x_continuous(
+                                  expand = c(0.5 / length(data$labels$x), 0)) +
+              ggplot2::coord_flip()
     } else {
-        gg <- gg + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        gg <- gg +
+              ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
+                                                                 hjust = 1))
     }
 
     return(gg)
 }
 
-ggheatmap <- function(data) {
+#' Make Heatmap
+#'
+#' Produce the group of plots required for a heatmap with cluster dendrograms
+#' from a matrix
+#'
+#' @param data Matrix of data to plot
+#'
+#' @return list of components of the cluster heatmap
+#'
+#' @export
+makeHeatmap <- function(data) {
 
-    colours <- colorRampPalette(brewer.pal(9, "GnBu"))(16)
+    colours <- colorRampPalette(RColorBrewer::brewer.pal(9, "GnBu"))(16)
 
-    row.hc <- hclust(dist(x), "ward")
-    col.hc <- hclust(dist(x), "ward")
+    row.hc <- hclust(dist(data),    "ward.D")
+    col.hc <- hclust(dist(t(data)), "ward.D")
 
-    row.dendro <- dendro_data(as.dendrogram(row.hc), type = "rectangle")
-    col.dendro <- dendro_data(as.dendrogram(col.hc), type = "rectangle")
+    row.dendro <- ggdendro::dendro_data.dendrogram(as.dendrogram(row.hc),
+                                                   type = "rectangle")
+    col.dendro <- ggdendro::dendro_data.dendrogram(as.dendrogram(col.hc),
+                                                   type = "rectangle")
 
-    row.plot <- dendroPlot(row.dendro, rows = TRUE, labels = FALSE) +
-                theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
-    col.plot <- dendroPlot(col.dendro, rows = FALSE, labels = TRUE) +
-                scale_x_continuous(breaks = 1:ncol(data),
-                                   labels = colnames(data)) +
-                theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
+    row.plot <- heatmapDendro(row.dendro, rows = TRUE, labels = FALSE) +
+                ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
+    col.plot <- heatmapDendro(col.dendro, rows = FALSE, labels = TRUE) +
+                ggplot2::scale_x_continuous(breaks = 1:ncol(data),
+                                            labels = colnames(data)) +
+                ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
 
     row.ord <- match(row.dendro$labels$label, rownames(data))
     col.ord <- match(col.dendro$labels$label, colnames(data))
 
     data.ord <- data[row.ord, col.ord]
     dimnames(data.ord) <- NULL
-    data.ord <- melt(data.ord)
+    data.ord <- reshape::melt.array(data.ord)
 
-    gg <- ggplot(data.ord, aes(X2, X1)) +
-          geom_tile(aes(fill = value), colour = "white") +
-          scale_till_gradientn(colours = colours) +
-          labs(x = NULL, y = NULL) +
-          scale_x_continuous(expand = c(0, 0)) +
-          scale_y_continuous(expand = c(0, 0), breaks = NULL) +
-          theme(plot.margin = unit(c(0, 0, 0, 0), "lines"))
+    gg <- ggplot2::ggplot(data.ord, ggplot2::aes(X2, X1)) +
+          ggplot2::geom_tile(ggplot2::aes(fill = value), colour = "white") +
+          ggplot2::scale_fill_gradientn(colours = colours) +
+          ggplot2::labs(x = NULL, y = NULL) +
+          ggplot2::scale_x_continuous(expand = c(0, 0)) +
+          ggplot2::scale_y_continuous(expand = c(0, 0), breaks = NULL) +
+          ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
 
     return.list <- list(col = col.plot, row = row.plot, centre = gg)
 
     invisible(return.list)
 }
 
+#' Show heatmap
+#'
+#' Assemble and display the components of a cluster heatmap
+#'
+#' @param plot.list List of plot components returned by makeHeatmap
+#' @param col.width Width of the column cluster dendrogram
+#' @param row.width Width of the row cluster dendrogram
+#'
+#' @export
 showHeatmap <- function(plot.list, col.width = 0.2, row.width = 0.2) {
 
-    gt <- gtable(widths  = unit(c(1 - row.width, row.width), "null"),
-                 heights = unit(c(1 - col.width, col.width), "null"))
+    grid::grid.newpage()
 
-    grobs <- lapply(plot.list, function(p) gg(gg(p)))
+    top.layout <- grid::grid.layout(
+                    nrow    = 2,
+                    ncol    = 2,
+                    widths  = grid::unit(c(1 - row.width, row.width), "null"),
+                    heights = grid::unit(c(col.width, 1 - col.width), "null"))
+
+    grid::pushViewport(grid::viewport(layout = top.layout))
 
     if (col.width > 0) {
-        gt <- gtable_add_grob(gt, grobs$col[[]], 1, 1)
+        print(plot.list$col,
+              vp = grid::viewport(layout.pos.col = 1, layout.pos.row = 1))
     }
-
-    print(plot.list$col, vp = viewport(layout.pos.col = 1, layout.pos.row = 1))
 
     if (row.width > 0) {
         print(plot.list$row,
-              vp = viewport(layout.pos.col = 2, layout.pos.row = 2))
+              vp = grid::viewport(layout.pos.col = 2, layout.pos.row = 2))
     }
 
-    print(plot.data$centre +
-          theme(axis.line = element_blank(),
-                axis.text.x = element_blank(),
-                axis.text.y = element_blank(),
-                axis.ticks = element_blank(),
-                axis.title.x = element_blank(),
-                axis.title.y = element_blank(),
-                legend.position = "none",
-                panel.background = element_blank(),
-                panel.border = element_blank(),
-                panel.grid.major = element_blank(),
-                panel.grid.minor = element_blank(),
-                plot.background = element_blank()),
-          vp = viewport(layout.pos.col = 1, layout.pos.row = 2))
+    print(plot.list$centre +
+          ggplot2::theme(axis.line        = ggplot2::element_blank(),
+                         axis.text.x      = ggplot2::element_blank(),
+                         axis.text.y      = ggplot2::element_blank(),
+                         axis.ticks       = ggplot2::element_blank(),
+                         axis.title.x     = ggplot2::element_blank(),
+                         axis.title.y     = ggplot2::element_blank(),
+                         legend.position  = "none",
+                         panel.background = ggplot2::element_blank(),
+                         panel.border     = ggplot2::element_blank(),
+                         panel.grid.major = ggplot2::element_blank(),
+                         panel.grid.minor = ggplot2::element_blank(),
+                         plot.background  = ggplot2::element_blank()),
+          vp = grid::viewport(layout.pos.col = 1, layout.pos.row = 2))
 
-    legend <- g_legend(plot.list$centre)
-    pushViewport(viewport(layout.pos.col = 2, layout.pos.row = 1))
-    grid.draw(legend)
-    upViewport(0)
+    legend <- heatmapLegend(plot.list$centre)
+    grid::pushViewport(grid::viewport(layout.pos.col = 2, layout.pos.row = 1))
+    grid::grid.draw(legend)
+    grid::upViewport(0)
+}
+
+#' Heatmap legend
+#'
+#' Extract the legend from a ggplot2 heatmap
+#'
+#' @param heatmap Plot to extract the legend from
+#'
+#' @return The heatmap legend
+heatmapLegend <- function(heatmap) {
+    elems  <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(heatmap))
+    name   <- which(sapply(elems$grobs, function(x) x$name) == "guide-box")
+    legend <- tmp$grobs[[name]]
+    return(legend)
 }

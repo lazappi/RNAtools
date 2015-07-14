@@ -19,4 +19,6 @@ Imports: DESeq,
     tidyr,
     magrittr,
     ggplot2,
-    grid
+    grid,
+    ggdendro,
+    RColorBrewer
