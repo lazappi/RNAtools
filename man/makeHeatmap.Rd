@@ -4,10 +4,12 @@
 \alias{makeHeatmap}
 \title{Make Heatmap}
 \usage{
-makeHeatmap(data)
+makeHeatmap(data, dist.mat = FALSE)
 }
 \arguments{
 \item{data}{Matrix of data to plot}
+
+\item{dist.mat}{Boolean, whether the matrix already contains distances}
 }
 \value{
 list of components of the cluster heatmap

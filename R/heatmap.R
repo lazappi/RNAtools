@@ -34,19 +34,25 @@ heatmapDendro <- function(data, rows = TRUE) {
 #' Produce the group of plots required for a heatmap with cluster dendrograms
 #' from a matrix
 #'
-#' @param data Matrix of data to plot
+#' @param data     Matrix of data to plot
+#' @param dist.mat Boolean, whether the matrix already contains distances
 #'
 #' @return list of components of the cluster heatmap
 #'
 #' @importFrom magrittr "%>%"
 #'
 #' @export
-makeHeatmap <- function(data) {
+makeHeatmap <- function(data, dist.mat = FALSE) {
 
     colours <- rev(colorRampPalette(RColorBrewer::brewer.pal(9, "Blues"))(255))
 
-    row.hc <- hclust(dist(data),    "ward.D")
-    col.hc <- hclust(dist(t(data)), "ward.D")
+    if (dist.mat) {
+        row.hc <- hclust(as.dist(data),    "ward.D")
+        col.hc <- hclust(as.dist(t(data)), "ward.D")
+    } else {
+        row.hc <- hclust(dist(data),    "ward.D")
+        col.hc <- hclust(dist(t(data)), "ward.D")
+    }
 
     row.dendro <- ggdendro::dendro_data.dendrogram(as.dendrogram(row.hc),
                                                    type = "rectangle")
