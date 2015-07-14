@@ -18,4 +18,8 @@ Imports: DESeq,
     dplyr,
     tidyr,
     magrittr,
-    ggplot2
+    ggplot2,
+    grid,
+    ggdendro,
+    RColorBrewer,
+    limma
