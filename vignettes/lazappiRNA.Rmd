@@ -21,8 +21,9 @@ knitr::opts_chunk$set(
                         #dev            = "png",
                         echo           = TRUE,
                         error          = FALSE,
-                        fig.width      = 14,
-                        fig.height     = 8,
+                        fig.width      = 7,
+                        fig.height     = 5,
+                        fig.align      = "center",
                         highlight      = TRUE,
                         include        = TRUE,
                         message        = FALSE,
@@ -121,9 +122,7 @@ countDensity(counts) + theme_bw() + ggtitle("Count Densities")
 
 Here we can see that the distribution is both over a large range and heavily
 skewed towards low values. For this reason transformed version of counts are
-commonly used for plotting, such as: $x = x + 1$
-
-$$ x + 1 $$
+commonly used for plotting, such as: 
 
 $$
 \begin{aligned}
@@ -156,7 +155,7 @@ densities <- listDensity(transformed)
 
 names(densities)
 
-densities[["combined"]]
+densities$combined
 ```
 
 Similar function exist for producing boxplots.
@@ -164,7 +163,7 @@ Similar function exist for producing boxplots.
 ```{r boxplots}
 boxplots <- listBoxplots(transformed)
 
-boxplots["combined"]
+boxplots$combined
 ```
 
 Both sets of plots can be helpful for exploring a dataset. The boxplots clearly
@@ -179,7 +178,7 @@ compared to the average expression of the two samples.
 ```{r ma-plots}
 ma.plots <- listMA(transformed)
 
-ma.plots[["combined"]]
+ma.plots$combined
 ```
 
 Here we can see the reproducability between samples and whether normalisation
@@ -191,7 +190,7 @@ With more samples the numbers of these plot grows quickly and it may be more
 useful to select a single transformation or some samples of interest.
 
 ```{r single-ma}
-countMA(transformed[["log"]])
+countMA(transformed$log)
 ```
 
 For this dataset the results look pretty good. The plot are centered around
@@ -205,7 +204,7 @@ on the y-axis. As dendrograms indicating the clustering are included the result
 is a list of _ggplot2_ objects instead of a single plot. The `showHeatmap`
 function can assemble these into a single image.
 
-```{r heatmaps}
+```{r heatmaps, fig.height = 7}
 heatmap <- countHeatmap(transformed$log, groups = groups)
 
 names(heatmap)
