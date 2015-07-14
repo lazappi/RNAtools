@@ -38,6 +38,8 @@ heatmapDendro <- function(data, rows = TRUE) {
 #'
 #' @return list of components of the cluster heatmap
 #'
+#' @importFrom magrittr "%>%"
+#'
 #' @export
 makeHeatmap <- function(data) {
 
@@ -51,9 +53,9 @@ makeHeatmap <- function(data) {
     col.dendro <- ggdendro::dendro_data.dendrogram(as.dendrogram(col.hc),
                                                    type = "rectangle")
 
-    row.plot <- heatmapDendro(row.dendro, rows = TRUE, labels = FALSE) +
+    row.plot <- heatmapDendro(row.dendro, rows = TRUE) +
                 ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
-    col.plot <- heatmapDendro(col.dendro, rows = FALSE, labels = TRUE) +
+    col.plot <- heatmapDendro(col.dendro, rows = FALSE) +
                 ggplot2::scale_x_continuous(breaks = 1:ncol(data),
                                             labels = colnames(data)) +
                 ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
@@ -61,11 +63,15 @@ makeHeatmap <- function(data) {
     row.ord <- match(row.dendro$labels$label, rownames(data))
     col.ord <- match(col.dendro$labels$label, colnames(data))
 
-    data.ord <- data[row.ord, col.ord]
-    dimnames(data.ord) <- NULL
-    data.ord <- reshape::melt.array(data.ord)
+    plot.data <- data %>%
+                 data.frame %>%
+                 dplyr::select(col.ord) %>%
+                 dplyr::filter(row.ord) %>%
+                 dplyr::add_rownames() %>%
+                 tidyr::gather(key = rownames) %>%
+                 magrittr::set_colnames(c("row", "col", "value"))
 
-    gg <- ggplot2::ggplot(data.ord, ggplot2::aes(X2, X1)) +
+    gg <- ggplot2::ggplot(plot.data, ggplot2::aes(row, col)) +
           ggplot2::geom_tile(ggplot2::aes(fill = value), colour = "white") +
           ggplot2::scale_fill_gradientn(colours = colours) +
           ggplot2::labs(x = NULL, y = NULL) +
@@ -73,9 +79,9 @@ makeHeatmap <- function(data) {
           ggplot2::scale_y_continuous(expand = c(0, 0), breaks = NULL) +
           ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
 
-    return.list <- list(col = col.plot, row = row.plot, centre = gg)
+    plot.list <- list(col = col.plot, row = row.plot, centre = gg)
 
-    invisible(return.list)
+    invisible(plot.list)
 }
 
 #' Show heatmap
@@ -140,6 +146,6 @@ showHeatmap <- function(plot.list, col.width = 0.2, row.width = 0.2) {
 heatmapLegend <- function(heatmap) {
     elems  <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(heatmap))
     name   <- which(sapply(elems$grobs, function(x) x$name) == "guide-box")
-    legend <- tmp$grobs[[name]]
+    legend <- elems$grobs[[name]]
     return(legend)
 }
