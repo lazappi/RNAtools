@@ -84,8 +84,71 @@ plotPCA <- function(data, top = nrow(data), groups = colnames(data),
                                        label = Sample)) +
           ggplot2::geom_text() +
           ggplot2::ggtitle(paste("PC1 vs PC2, top", top, "variable genes")) +
-          ggplot2::xlab(paste0("PC1, VarExp: ", round(percent.var[1], 4), "%")) +
-          ggplot2::ylab(paste0("PC2, VarExp: ", round(percent.var[2], 4), "%")) +
+          ggplot2::xlab(paste0("PC1, VarExp: ",
+                               round(percent.var[1], 4), "%")) +
+          ggplot2::ylab(paste0("PC2, VarExp: ",
+                               round(percent.var[2], 4), "%")) +
+          ggplot2::theme(axis.title   = ggplot2::element_text(size = 20),
+                         axis.text    = ggplot2::element_text(size = 15),
+                         plot.title   = ggplot2::element_text(size = 30,
+                                                              face = "bold"),
+                         legend.text  = ggplot2::element_text(size = 15),
+                         legend.title = ggplot2::element_text(size = 15))
+    if (plot) {
+        return(gg)
+    } else {
+        return(plot.data)
+    }
+}
+
+#' Plot MDS
+#'
+#' Produce a MDS plot from a matrix using ggplot2
+#'
+#' @param data   Matrix of data to plot
+#' @param top    Number of rows with highest deviance to select for plotting
+#' @param groups Vector of groups assigned to sample columns
+#' @param plot   Boolean, if true return plot, if false return plot data
+#'
+#' @return ggplot2 object containing the PCA plot, or the dataframe of plot data
+#'
+#' @importFrom magrittr "%>%"
+#'
+#' @export
+plotMDS <- function(data, top = nrow(data), groups = colnames(data),
+                    plot = TRUE) {
+
+    top.data <- data %>%
+                data.frame %>%
+                dplyr::mutate(sqr.dev =
+                                  rowMeans((data - rowMeans(data)) ^ 2)) %>%
+                dplyr::top_n(top, sqr.dev) %>%
+                dplyr::select(-sqr.dev)
+
+    dists <- matrix(0, nrow = ncol(data), ncol = ncol(data),
+                    dimnames = list(colnames(data), colnames(data)))
+
+    for (i in 2:ncol(data)) {
+        dists[i, 1:(i - 1)] <- sqrt(colMeans(
+                                        (top.data[, i] -
+                                             top.data[, 1:(i - 1),
+                                                      drop = FALSE]) ^ 2))
+    }
+
+    MDS.data <- cmdscale(as.dist(dists), k = 2)
+
+    plot.data <- data.frame(X      = MDS.data[, 1],
+                            Y      = MDS.data[, 2],
+                            Sample = colnames(data),
+                            Group  = groups)
+
+    gg <- ggplot2::ggplot(plot.data,
+                          ggplot2::aes(x = X, y = Y, colour = Group,
+                                       label = Sample)) +
+          ggplot2::geom_text() +
+          ggplot2::ggtitle(paste("Dim1 vs Dim2, top", top, "variable genes")) +
+          ggplot2::xlab("Dimension 1") +
+          ggplot2::ylab("Dimension 2") +
           ggplot2::theme(axis.title   = ggplot2::element_text(size = 20),
                          axis.text    = ggplot2::element_text(size = 15),
                          plot.title   = ggplot2::element_text(size = 30,
