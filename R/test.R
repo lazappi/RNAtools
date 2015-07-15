@@ -78,12 +78,19 @@ deseq2Test <- function(count.data, group1, group2) {
 #' Test a normalised EList object using limma-voom
 #'
 #' @param voom.data EList object to test
+#' @param group1 First group to test, the reference or control
+#' @param group2 Second group to test, the treatment
 #'
-#' @return
+#' @return dataframe containing test results
 #'
 #' @export
-voomTest <- function(voom.data) {
+voomTest <- function(voom.data, group1, group2) {
 
+    design <- voom.data$design
 
-    return( )
+    fit <- limma::eBayes(limma::lmFit(voom.data, design))
+    top.table <- limma::topTable(fit, coef = paste0("groups", group2), n = Inf,
+                                 sort.by = "p")
+
+    return(top.table)
 }
