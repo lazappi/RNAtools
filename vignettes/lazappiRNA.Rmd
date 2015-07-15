@@ -264,6 +264,19 @@ for(object in objects) {
 **NOTE:** It is important that the names of this list are not changed as they
 will be used by following functions to identify which method to apply.
 
+Normalistion
+============
+
+Each package has its own normalisation procedures. Here we use the `listNorm`
+function to normalise our list of objects.
+
+```{r normalise}
+normalised <- listNorm(objects)
+```
+
+Please read the documentation for the packages you plan to use to properly
+undstand what is been done in this process.
+
 Session Info
 ============
 
