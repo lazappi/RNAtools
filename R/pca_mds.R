@@ -140,10 +140,11 @@ plotMDS <- function(data, top = nrow(data), groups = colnames(data),
                 sqr.dist <- sqr.dist[1:top]
 
                 dists[i, j] <- sqrt(mean(sqr.dist))
-
-                #dists[i, j] <- sqrt(mean(sort.int((x[, i] - x[, j]) ^ 2, partial = top.idx)[top.index:ncol(data)]))
             }
         }
+
+        axis.label <- "Leading logFC dim"
+
     } else {
         top.data <- data %>%
                     data.frame %>%
@@ -158,6 +159,8 @@ plotMDS <- function(data, top = nrow(data), groups = colnames(data),
                                                  top.data[, 1:(i - 1),
                                                           drop = FALSE]) ^ 2))
         }
+
+        axis.label <- "Principal Component"
     }
 
     MDS.data <- cmdscale(as.dist(dists), k = 2)
@@ -171,9 +174,10 @@ plotMDS <- function(data, top = nrow(data), groups = colnames(data),
                           ggplot2::aes(x = X, y = Y, colour = Group,
                                        label = Sample)) +
           ggplot2::geom_text() +
-          ggplot2::ggtitle(paste("Dim1 vs Dim2, top", top, "variable genes")) +
-          ggplot2::xlab("Dimension 1") +
-          ggplot2::ylab("Dimension 2") +
+          ggplot2::ggtitle(paste("MDS Plot, top", top, selection,
+                                 "variable genes")) +
+          ggplot2::xlab(paste(axis.label, 1)) +
+          ggplot2::ylab(paste(axis.label, 2)) +
           ggplot2::theme(axis.title   = ggplot2::element_text(size = 20),
                          axis.text    = ggplot2::element_text(size = 15),
                          plot.title   = ggplot2::element_text(size = 30,
@@ -211,10 +215,16 @@ listMDS <- function(data.list, top = nrow(data.list[[1]]),
 
         gg <- plotMDS(data.list[[name]], top = top , group = groups,
                       selection = selection) +
-              ggplot2::ggtitle(paste(name," - Dim1 vs Dim2, top", top,
-                                     "variable genes"))
+              ggplot2::ggtitle(paste(name," - MDS Plot, top", top,
+                                     selection, "variable genes"))
 
         plots[[name]] <- gg
+    }
+
+    if (selection == "pairwise") {
+        axis.label <- "Leading logFC dim"
+    } else {
+        axis.label <- "Principal Component"
     }
 
     gg <- data.list %>%
@@ -225,9 +235,10 @@ listMDS <- function(data.list, top = nrow(data.list[[1]]),
                                      label = Sample)) +
         ggplot2::geom_text() +
         ggplot2::facet_wrap(~ matrix) +
-        ggplot2::ggtitle(paste("Dim1 vs Dim2, top", top, "variable genes")) +
-        ggplot2::xlab("Dimension 1") +
-        ggplot2::ylab("Dimension 2") +
+        ggplot2::ggtitle(paste("MDS Plots, top", top, selection,
+                               "variable genes")) +
+        ggplot2::xlab(paste(axis.label, 1)) +
+        ggplot2::ylab(paste(axis.label, 2)) +
         ggplot2::theme(axis.title   = ggplot2::element_text(size = 20),
                        axis.text    = ggplot2::element_text(size = 15),
                        plot.title   = ggplot2::element_text(size = 30,
