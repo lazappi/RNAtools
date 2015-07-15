@@ -212,6 +212,37 @@ names(heatmap)
 showHeatmap(heatmap)
 ```
 
+Principal component analysis (PCA) can also be useful for visualising the
+similarities between samples, in particular identifying outliers and batch \
+effects. PCA reduces the dimensionality of a dataset to identify the directions
+with greatest variance. Plotting samples onto the reduced dimensions allows
+quick comparisons.
+
+```{r PCA}
+PCA <- listPCA(transformed, top = 500, groups = groups)
+
+PCA$combined
+```
+
+Since PCA can be problematic with very high-dimensional data we select the
+top 500 most variable genes, and provide groups to colour the labels. As we are
+looking for differentially expressed genes we hope to see a clear separation
+between the two groups, as is the case along PC1.
+
+Multidimenionsal scaling (MDS) provides an alternative to PCA that aims to
+visually represent the distances amongst a set of samples. Genes can be selected
+based on "common" deviations across all samples (similar to what was done with
+PCA) or "pairwise" between each pair of samples.
+
+```{r}
+MDS <- listMDS(transformed, top = 500, group = groups, selection = "pairwise")
+
+MDS$combined
+```
+
+In this simple example the PCA and MDS plots are highly similar but with more
+complex datasets it may be worthwhile examining both.
+
 Session Info
 ============
 
