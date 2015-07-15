@@ -39,13 +39,18 @@ edgeRTest <- function(dge, group1, group2) {
 #' Testa a normalised CountDataSet object using DESeq
 #'
 #' @param count.data Normalised CountDataSet object to test
+#' @param group1 First group to test, the reference or control
+#' @param group2 Second group to test, the treatment
 #'
-#' @return
+#' @return dataframe containing test results
 #'
 #' @export
-deseqTest <- function(count.data) {
+deseqTest <- function(count.data, group1, group2) {
 
-    return( )
+    results <- DESeq::nbinomTest(count.data, group1, group2)
+    results <- results[order(results$padj), ]
+
+    return(results)
 }
 
 
