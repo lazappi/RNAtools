@@ -4,17 +4,19 @@
 \alias{plotPCA}
 \title{Plot PCA}
 \usage{
-plotPCA(data, top = nrow(data), groups = colnames(data))
+plotPCA(data, top = nrow(data), groups = colnames(data), plot = TRUE)
 }
 \arguments{
 \item{data}{Matrix of data to plot}
 
-\item{top}{Number of rows with highes variance to select for plotting}
+\item{top}{Number of rows with highest variance to select for plotting}
 
 \item{groups}{Vector of groups assigned to sample columns}
+
+\item{plot}{Boolean, if true return plot, if false return plot data}
 }
 \value{
-ggplot2 object containg the PCA plot
+ggplot2 object containing the PCA plot, or the dataframe of plot data
 }
 \description{
 Produce a PCA plot from a matrix using ggplot2
