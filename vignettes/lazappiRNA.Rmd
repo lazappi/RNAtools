@@ -234,7 +234,7 @@ visually represent the distances amongst a set of samples. Genes can be selected
 based on "common" deviations across all samples (similar to what was done with
 PCA) or "pairwise" between each pair of samples.
 
-```{r}
+```{r MDS}
 MDS <- listMDS(transformed, top = 500, group = groups, selection = "pairwise")
 
 MDS$combined
@@ -242,6 +242,27 @@ MDS$combined
 
 In this simple example the PCA and MDS plots are highly similar but with more
 complex datasets it may be worthwhile examining both.
+
+Objects
+=======
+
+Each differential expression package makes use of its own objects. A function
+is provided to easily convert a matrix of counts into the appropriate objects
+for multiple packages, returned as a list.
+
+```{r objects}
+objects <- counts2Objects(counts, groups,
+                          methods = c("edgeR", "DESeq", "DESeq2", "voom"))
+
+names(objects)
+
+for(object in objects) {
+    print(class(object))
+}
+```
+
+**NOTE:** It is important that the names of this list are not changed as they
+will be used by following functions to identify which method to apply.
 
 Session Info
 ============
