@@ -20,16 +20,19 @@ listTest <- function(data.list) {
 #' Test a normalised DGEList object using edgeR
 #'
 #' @param dge Normalised DGEList object to test
+#' @param group1 First group to test, the reference or control
+#' @param group2 Second group to test, the treatment
 #'
-#' @return
+#' @return TopTags object of test results
 #'
 #' @export
-edgeRTest <- function(dge) {
+edgeRTest <- function(dge, group1, group2) {
 
+    genes.de <- edgeR::exactTest(dge, pair = c(group1, group2))
+    top.tags <- edgeR::topTags(genes.de, n = nrow(dge))
 
-    return( )
+    return(top.tags)
 }
-
 
 #' DESeq Test
 #'
@@ -69,7 +72,7 @@ deseq2Test <- function(count.data) {
 #' @return
 #'
 #' @export
-voomNorm <- function(voom.data) {
+voomTest <- function(voom.data) {
 
 
     return( )
