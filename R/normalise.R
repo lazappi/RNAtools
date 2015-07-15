@@ -1,3 +1,47 @@
+#' List Normalise
+#'
+#' Apply the appropriate normalisation to a list of differential expression
+#' objects
+#'
+#' @param data.list List of differential expression objects
+#'
+#' @return List of normalised objects
+#'
+#' @export
+listNorm <- function(data.list) {
+
+    normalised <- list()
+
+    for (name in names(data.list)) {
+
+        data <- data.list[[name]]
+
+        switch(
+            name,
+
+            "edgeR" = {
+                norm <- edgeRNorm(data)
+            },
+
+            "DESeq" = {
+                norm <- deseqNorm(data)
+            },
+
+            "DESeq2" = {
+                norm <- deseq2Norm(data)
+            },
+
+            "voom" = {
+                norm <- voomNorm(data)
+            },
+        )
+
+        normalised[[name]] <- norm
+    }
+
+    return(normalised)
+}
+
 #' edgeR Normalise
 #'
 #' Normalise a DGEList object using edgeR
