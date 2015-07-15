@@ -103,12 +103,14 @@ plotPCA <- function(data, top = nrow(data), groups = colnames(data),
 
 #' Plot MDS
 #'
-#' Produce a MDS plot from a matrix using ggplot2
+#' Produce a MDS plot from a matrix using ggplot2. Based on the limma function.
 #'
 #' @param data   Matrix of data to plot
 #' @param top    Number of rows with highest deviance to select for plotting
 #' @param groups Vector of groups assigned to sample columns
 #' @param plot   Boolean, if true return plot, if false return plot data
+#' @param selection Select rows in a "pariwise" manner between samples or
+#'                  "common" across all samples
 #'
 #' @return ggplot2 object containing the PCA plot, or the dataframe of plot data
 #'
@@ -116,23 +118,46 @@ plotPCA <- function(data, top = nrow(data), groups = colnames(data),
 #'
 #' @export
 plotMDS <- function(data, top = nrow(data), groups = colnames(data),
-                    plot = TRUE) {
+                    plot = TRUE, selection = c("pairwise", "common")) {
 
-    top.data <- data %>%
-                data.frame %>%
-                dplyr::mutate(sqr.dev =
-                                  rowMeans((data - rowMeans(data)) ^ 2)) %>%
-                dplyr::top_n(top, sqr.dev) %>%
-                dplyr::select(-sqr.dev)
+    if (missing(selection)) {
+        selection <- "pairwise"
+    } else {
+        selection <- match.arg(selection)
+    }
 
     dists <- matrix(0, nrow = ncol(data), ncol = ncol(data),
                     dimnames = list(colnames(data), colnames(data)))
 
-    for (i in 2:ncol(data)) {
-        dists[i, 1:(i - 1)] <- sqrt(colMeans(
-                                        (top.data[, i] -
-                                             top.data[, 1:(i - 1),
-                                                      drop = FALSE]) ^ 2))
+    if (selection == "pairwise") {
+
+        top.idx <- ncol(data) - top + 1
+
+        for (i in 2:ncol(data)) {
+            for (j in 1:(i - 1)) {
+
+                sqr.dist <- sort((data[, i] - data[, j]) ^ 2, decreasing = TRUE)
+                sqr.dist <- sqr.dist[1:top]
+
+                dists[i, j] <- sqrt(mean(sqr.dist))
+
+                #dists[i, j] <- sqrt(mean(sort.int((x[, i] - x[, j]) ^ 2, partial = top.idx)[top.index:ncol(data)]))
+            }
+        }
+    } else {
+        top.data <- data %>%
+                    data.frame %>%
+                    dplyr::mutate(sqr.dev =
+                                  rowMeans((data - rowMeans(data)) ^ 2)) %>%
+                    dplyr::top_n(top, sqr.dev) %>%
+                    dplyr::select(-sqr.dev)
+
+        for (i in 2:ncol(data)) {
+            dists[i, 1:(i - 1)] <- sqrt(colMeans(
+                                            (top.data[, i] -
+                                                 top.data[, 1:(i - 1),
+                                                          drop = FALSE]) ^ 2))
+        }
     }
 
     MDS.data <- cmdscale(as.dist(dists), k = 2)
@@ -160,4 +185,57 @@ plotMDS <- function(data, top = nrow(data), groups = colnames(data),
     } else {
         return(plot.data)
     }
+}
+
+#' List MDS
+#'
+#' Produce MDS plots from a list of matrices
+#'
+#' @param data.list List of matrices to plot
+#' @param top       Number of rows with highes variance to select for plotting
+#' @param groups    Vector of groups assigned to sample columns
+#' @param selection Select rows in a "pariwise" manner between samples or
+#'                  "common" across all samples
+#'
+#' @return List of ggplot2 objects containing MDS plots
+#'
+#' @importFrom magrittr "%>%"
+#'
+#' @export
+listMDS <- function(data.list, top = nrow(data.list[[1]]),
+                    groups = colnames(data.list[[1]]), selection = "pairwise") {
+
+    plots <- list()
+
+    for (name in names(data.list)) {
+
+        gg <- plotMDS(data.list[[name]], top = top , group = groups,
+                      selection = selection) +
+              ggplot2::ggtitle(paste(name," - Dim1 vs Dim2, top", top,
+                                     "variable genes"))
+
+        plots[[name]] <- gg
+    }
+
+    gg <- data.list %>%
+        lapply(plotMDS, top = top, group = groups, plot = FALSE,
+               selection = selection) %>%
+        combineMatrices(lengthen = FALSE) %>%
+        ggplot2::ggplot(ggplot2::aes(x = X, y = Y, colour = Group,
+                                     label = Sample)) +
+        ggplot2::geom_text() +
+        ggplot2::facet_wrap(~ matrix) +
+        ggplot2::ggtitle(paste("Dim1 vs Dim2, top", top, "variable genes")) +
+        ggplot2::xlab("Dimension 1") +
+        ggplot2::ylab("Dimension 2") +
+        ggplot2::theme(axis.title   = ggplot2::element_text(size = 20),
+                       axis.text    = ggplot2::element_text(size = 15),
+                       plot.title   = ggplot2::element_text(size = 30,
+                                                            face = "bold"),
+                       legend.text  = ggplot2::element_text(size = 15),
+                       legend.title = ggplot2::element_text(size = 15))
+
+    plots[["combined"]] <- gg
+
+    return(plots)
 }

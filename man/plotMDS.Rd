@@ -4,7 +4,8 @@
 \alias{plotMDS}
 \title{Plot MDS}
 \usage{
-plotMDS(data, top = nrow(data), groups = colnames(data), plot = TRUE)
+plotMDS(data, top = nrow(data), groups = colnames(data), plot = TRUE,
+  selection = c("pairwise", "common"))
 }
 \arguments{
 \item{data}{Matrix of data to plot}
@@ -14,11 +15,14 @@ plotMDS(data, top = nrow(data), groups = colnames(data), plot = TRUE)
 \item{groups}{Vector of groups assigned to sample columns}
 
 \item{plot}{Boolean, if true return plot, if false return plot data}
+
+\item{selection}{Select rows in a "pariwise" manner between samples or
+                 "common" across all samples}
 }
 \value{
 ggplot2 object containing the PCA plot, or the dataframe of plot data
 }
 \description{
-Produce a MDS plot from a matrix using ggplot2
+Produce a MDS plot from a matrix using ggplot2. Based on the limma function.
 }
 
