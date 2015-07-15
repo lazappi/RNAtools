@@ -22,4 +22,5 @@ Imports: DESeq,
     grid,
     ggdendro,
     RColorBrewer,
-    limma
+    limma,
+    genefilter
