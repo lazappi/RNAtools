@@ -4,13 +4,42 @@
 #' expression objects
 #'
 #' @param data.list List of normalised differential expression objects
+#' @param group1 First group to test, the reference or control
+#' @param group2 Second group to test, the treatment
 #'
 #' @return List of test result objects
 #'
 #' @export
-listTest <- function(data.list) {
+listTest <- function(data.list, group1, group2) {
 
     tested <- list()
+
+    for (name in names(data.list)) {
+
+        data <- data.list[[name]]
+
+        switch(
+            name,
+
+            "edgeR" = {
+                test <- edgeRTest(data, group1, group2)
+            },
+
+            "DESeq" = {
+                test <- deseqTest(data, group1, group2)
+            },
+
+            "DESeq2" = {
+                test <- deseq2Test(data, group1, group2)
+            },
+
+            "voom" = {
+                test <- voomTest(data, group1, group2)
+            },
+        )
+
+        tested[[name]] <- test
+    }
 
     return(tested)
 }
@@ -53,7 +82,6 @@ deseqTest <- function(count.data, group1, group2) {
     return(results)
 }
 
-
 #' DESeq2 Test
 #'
 #' Test a normalised DESeqDataSet using DESeq2
@@ -94,3 +122,4 @@ voomTest <- function(voom.data, group1, group2) {
 
     return(top.table)
 }
+
