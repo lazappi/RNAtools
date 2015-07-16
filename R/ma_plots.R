@@ -159,6 +159,7 @@ listResultsMA <- function(data.list, alpha = 0.05) {
 #' @param method  Method used to produce the results
 #' @param alpha   Significance level for labelling differentially
 #'                expressed genes
+#' @param plot    Boolean, if true return plot, if false return plot data
 #'
 #' @return ggplot2 object containg MA plot
 #'
@@ -166,7 +167,7 @@ listResultsMA <- function(data.list, alpha = 0.05) {
 #'
 #' @export
 resultsMA <- function(results, method = c("edgeR", "DESeq", "DESeq2", "voom"),
-                      alpha = 0.05) {
+                      alpha = 0.05, plot = TRUE) {
 
     # Check that a valid method has been given
     if (missing(method)) {
@@ -241,6 +242,9 @@ resultsMA <- function(results, method = c("edgeR", "DESeq", "DESeq2", "voom"),
           ggplot2::ylab(ylabel) +
           ggplot2::theme(legend.position = "none")
 
-    return(gg)
-
+    if (plot) {
+        return(gg)
+    } else {
+        return(plot.data)
+    }
 }
