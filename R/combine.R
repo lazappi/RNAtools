@@ -1,3 +1,56 @@
+#' Venn Diagram
+#'
+#' Produce a Venn diagram from a list of differential expression results
+#'
+#' @param data.list List of results to combine
+#' @param alpha     Significance level for selecting genes
+#'
+#' @return Venn diagram object
+#'
+#' @importFrom magrittr "%>%"
+#'
+#' @export
+vennDiagram <- function(data.list, alpha = 0.05) {
+
+    gene.lists <- list()
+
+    for (name in names(data.list)) {
+
+        genes <- data.list[[name]] %>%
+                 regulariseResults(name) %>%
+                 dplyr::filter(Significance <= 0.05)
+
+        gene.lists[[name]] <- genes$Gene
+    }
+
+    colours <- RColorBrewer::brewer.pal(n = length(gene.lists), name = "Dark2")
+
+    venn <- VennDiagram::venn.diagram(gene.lists,
+                                      filename   = NULL,
+                                     height     = 3000,
+                                     width      = 3000,
+                                     resolution = 500,
+                                     col        = "transparent",
+                                     fill       = colours,
+                                     alpha      = 0.4,
+                                     cex        = 1.5,
+                                     fontfamily = "sans",
+                                     fontface   = "bold",
+                                     cat.col    = colours,
+                                     cat.cex    = 1.5,
+                                     cat.pos    = 0,
+                                     cat.dist   = 0.05,
+                                     margin     = 0.1)
+
+    return(venn)
+
+    #plot.new()
+    #grid.draw(venn)
+    #text(0.5, 1, "Comparison of Lists", vfont = c("serif", "bold"), cex = 2)
+    #text(0.5, 0, "Number of Differentially Expressed Genes",
+    #     vfont = c("serif", "plain"), cex = 1.5)
+}
+
 #' Jaccard Table
 #'
 #' Produce a table of Jaccard Indices from a list of differential expression
