@@ -139,16 +139,30 @@ listResultsMA <- function(data.list, alpha = 0.05) {
 
         data <- data.list[[name]]
 
-        regular.data <- regulariseResults(data, method)
+        regular.data <- regulariseResults(data, name)
 
-        gg <- resultsMA(data, method = name, alpha = alpha)
+        gg <- resultsMA(regular.data, method = "regular", alpha = alpha)
 
+        regular.data.list[[name]] <- regular.data
         plots[[name]] <- gg
     }
 
-    #gg <- data.list %>%
-    #      lapply(resultsMA,  plot = FALSE) %>%
-    #    combineMatrices(lengthen = FALSE) %>%
+    gg <- regular.data.list %>%
+          combineMatrices(lengthen = FALSE) %>%
+          dplyr::mutate(DE = Significance < alpha) %>%
+          ggplot2::ggplot(ggplot2::aes(x = Abundance, y = FoldChange,
+                                       colour = DE)) +
+          ggplot2::geom_rect(aes(xmin = -Inf, xmax = Inf,
+                                 ymin = -2,   ymax = 2),
+                             fill = "grey", alpha = 0.5, size = 0) +
+          ggplot2::geom_point() +
+          ggplot2::facet_wrap(~ matrix) +
+          ggplot2::geom_hline(yintercept = 0, colour = "blue") +
+          ggplot2::scale_colour_manual(values = c("black", "red")) +
+          ggplot2::xlab("log Abundance") +
+          ggplot2::ylab("log Fold Change") +
+          ggplot2::theme(legend.position = "none")
+
 
     plots[["combined"]] <- gg
 
@@ -181,9 +195,12 @@ resultsMA <- function(results,
     }
 
     if (method != "regular") {
-        plot.data <- results %>% regulariseResults(method = method)
+        results <- results %>% regulariseResults(method = method)
     }
-    plot.data <- plot.data %>% dplyr::mutate(DE = Significance < alpha)
+    plot.data <- results %>% dplyr::mutate(DE = Significance < alpha)
+
+    xlabel <- "log Abundance"
+    ylabel <- "log Fold Change"
 
     switch(
         method,

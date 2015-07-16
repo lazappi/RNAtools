@@ -4,7 +4,7 @@
 \alias{resultsMA}
 \title{Results MA}
 \usage{
-resultsMA(results, method = c("edgeR", "DESeq", "DESeq2", "voom"),
+resultsMA(results, method = c("edgeR", "DESeq", "DESeq2", "voom", "regular"),
   alpha = 0.05)
 }
 \arguments{
