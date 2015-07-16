@@ -52,7 +52,7 @@ listTest <- function(data.list, group1, group2) {
 #' @param group1 First group to test, the reference or control
 #' @param group2 Second group to test, the treatment
 #'
-#' @return TopTags object of test results
+#' @return dataframe containing test results
 #'
 #' @export
 edgeRTest <- function(dge, group1, group2) {
@@ -60,7 +60,7 @@ edgeRTest <- function(dge, group1, group2) {
     genes.de <- edgeR::exactTest(dge, pair = c(group1, group2))
     top.tags <- edgeR::topTags(genes.de, n = nrow(dge))
 
-    return(top.tags)
+    return(top.tags$table)
 }
 
 #' DESeq Test
