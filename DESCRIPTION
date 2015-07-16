@@ -23,4 +23,5 @@ Imports: DESeq,
     ggdendro,
     RColorBrewer,
     limma,
-    genefilter
+    genefilter,
+    VennDiagram
