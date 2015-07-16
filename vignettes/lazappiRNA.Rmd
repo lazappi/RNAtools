@@ -277,6 +277,22 @@ normalised <- listNorm(objects)
 Please read the documentation for the packages you plan to use to properly
 undstand what is been done in this process.
 
+Testing
+=======
+
+Once the data has been normalised we can test for differential expression. We 
+first need to assign the groups we would like to test as `group1`, the
+reference or control, and `group1` the treament. The control group should always 
+be whichever group was defined as the lowest level of the `groups` factor. Again
+a list function allows use to perform all methods simultaneously.
+
+```{r test}
+group1 <- "HEK293T"
+group2 <- "Ramos B cell"
+
+tested <- listTest(normalised, group1, group2)
+```
+
 Session Info
 ============
 
