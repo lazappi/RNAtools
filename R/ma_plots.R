@@ -116,3 +116,97 @@ getMAData <- function(data) {
 
     return(ma.data)
 }
+
+#' Results MA
+#'
+#' Produce an MA plot from results of a differential expression test
+#'
+#' @param results Results to plot
+#' @param method  Method used to produce the results
+#' @param alpha   Significance level for labelling differentially
+#'                expressed genes
+#'
+#' @return ggplot2 object containg MA plot
+#'
+#' @importFrom magrittr "%>%"
+#'
+#' @export
+resultsMA <- function(results, method = c("edgeR", "DESeq", "DESeq2", "voom"),
+                      alpha = 0.05) {
+
+    # Check that a valid method has been given
+    if (missing(method)) {
+        stop("Differential expression method must be specified")
+    } else {
+        method <- match.arg(method)
+    }
+
+    switch(
+        method,
+
+        edgeR = {
+            plot.data <- results %>%
+                         dplyr::select(FoldChange   = logFC,
+                                       Abundance    = logCPM,
+                                       Significance = FDR) %>%
+                         dplyr::mutate(DE = Significance < alpha)
+
+            xlabel <- "logCPM"
+            ylabel <- "logFC"
+        },
+
+        DESeq = {
+            plot.data <- results %>%
+                         dplyr::select(FoldChange   = log2FoldChange,
+                                       Abundance    = baseMean,
+                                       Significance = padj) %>%
+                         dplyr::mutate(Abundance = log2(Abundance)) %>%
+                         dplyr::mutate(DE = Significance < alpha)
+
+            xlabel <- "log2 mean of normalised counts"
+            ylabel <- expression(log[2] ~ fold ~ change)
+        },
+
+        DESeq2 = {
+            plot.data <- results %>%
+                         data.frame %>%
+                         dplyr::select(FoldChange   = log2FoldChange,
+                                       Abundance    = baseMean,
+                                       Significance = padj) %>%
+                         dplyr::mutate(Abundance = log2(Abundance)) %>%
+                         dplyr::mutate(DE = Significance < alpha)
+
+            xlabel <- "log2 mean of normalised counts"
+            ylabel <- expression(log[2] ~ fold ~ change)
+        },
+
+        voom = {
+            plot.data <- results %>%
+                         dplyr::select(FoldChange   = logFC,
+                                       Abundance    = AveExpr,
+                                       Significance = adj.P.Val) %>%
+                         #dplyr::mutate(Abundance = log2(Abundance)) %>%
+                         dplyr::mutate(DE = Significance < alpha)
+
+            xlabel <- "log average expression"
+            ylabel <- "logFC"
+        }
+    )
+
+    gg <- ggplot2::ggplot(plot.data,
+                          ggplot2::aes(x = Abundance, y = FoldChange,
+                                       colour = DE)) +
+          ggplot2::geom_rect(aes(xmin = -Inf, xmax = Inf,
+                                 ymin = -2,   ymax = 2),
+                             fill = "grey", alpha = 0.5, size = 0) +
+          ggplot2::geom_point() +
+          ggplot2::geom_hline(yintercept = 0, colour = "blue") +
+          ggplot2::scale_colour_manual(values = c("black", "red")) +
+          #ggplot2::scale_y_continuous(limits = c(-5, 5)) +
+          ggplot2::xlab(xlabel) +
+          ggplot2::ylab(ylabel) +
+          ggplot2::theme(legend.position = "none")
+
+    return(gg)
+
+}
