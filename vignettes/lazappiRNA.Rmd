@@ -336,6 +336,15 @@ to look at that plot separately.
 volcanos$voom
 ```
 
+Once we are satisfied that the results from each method look good we can begin
+to compare them. The Jaccard can be used to compare two lists and is calculated
+as the number of items in the intersect divided by the number in the union.
+
+```{r jaccard}
+jaccardTable(tested)
+```
+
+
 Session Info
 ============
 
