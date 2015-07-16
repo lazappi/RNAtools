@@ -317,6 +317,25 @@ edgeR::plotSmear(normalised$edgeR, de.tags = genes.de.names)
 rm(genes.de.names)
 ```
 
+An alternative to MA plots are volcano plots which show fold change against
+significance. The red shaded area shows absolute log fold changes less than two
+and the blue area significance levels less than 0.05. Grey points indicate
+genes that returned significance of zero (top), or were missing p-values
+(bottom). 
+
+```{r volcano}
+volcanos <- listVolcano(tested)
+
+volcanos$combined
+```
+
+Voom typically returns much lower significance levels so it can be preferable
+to look at that plot separately.
+
+```{r voom-volcano}
+volcanos$voom
+```
+
 Session Info
 ============
 
