@@ -156,3 +156,52 @@ counts2DESeq2 <- function(data, groups) {
 
     return(count.data)
 }
+
+
+regulariseResults <- function(results,
+                              method = c("edgeR", "DESeq", "DESeq2", "voom") ) {
+
+    # Check that a valid method has been given
+    if (missing(method)) {
+        stop("Differential expression method must be specified")
+    } else {
+        method <- match.arg(method)
+    }
+
+    switch(
+        method,
+
+        edgeR = {
+            regular <- results %>%
+                       dplyr::select(FoldChange   = logFC,
+                              Abundance    = logCPM,
+                              Significance = FDR)
+        },
+
+        DESeq = {
+            regular <- results %>%
+                       dplyr::select(FoldChange   = log2FoldChange,
+                              Abundance    = baseMean,
+                              Significance = padj) %>%
+                       dplyr::mutate(Abundance = log2(Abundance))
+        },
+
+        DESeq2 = {
+            regular <- results %>%
+                       data.frame %>%
+                       dplyr::select(FoldChange   = log2FoldChange,
+                                     Abundance    = baseMean,
+                                     Significance = padj) %>%
+                       dplyr::mutate(Abundance = log2(Abundance))
+        },
+
+        voom = {
+            regular <- results %>%
+                       dplyr::select(FoldChange   = logFC,
+                                     Abundance    = AveExpr,
+                                     Significance = adj.P.Val)
+        }
+    )
+
+    return(regular)
+}
