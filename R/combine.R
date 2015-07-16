@@ -163,3 +163,34 @@ vennSets <- function(set.list) {
 
     return(venn.sets)
 }
+
+#' Venn Genes
+#'
+#' Get list of genes for each region in a Venn diagram from a list of
+#' differential expression results
+#'
+#' @param data.list List of results to combine
+#' @param alpha     Significance level for selecting genes
+#'
+#' @return List of vectors of genes
+#'
+#' @importFrom magrittr "%>%"
+#'
+#' @export
+vennGenes <- function(data.list, alpha = 0.05) {
+
+    gene.lists <- list()
+
+    for (name in names(data.list)) {
+
+        regular.data <- data.list[[name]] %>%
+                        regulariseResults(name) %>%
+                        dplyr::filter(Significance <= 0.05)
+
+        gene.lists[[name]] <- regular.data$Gene
+    }
+
+    venn.genes <- vennSets(gene.lists)
+
+    return(venn.genes)
+}
