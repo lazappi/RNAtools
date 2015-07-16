@@ -133,18 +133,22 @@ getMAData <- function(data) {
 listResultsMA <- function(data.list, alpha = 0.05) {
 
     plots <- list()
+    regular.data.list <- list()
 
     for (name in names(data.list)) {
 
-        data = data.list[[name]]
+        data <- data.list[[name]]
+
+        regular.data <- regulariseResults(data, method)
 
         gg <- resultsMA(data, method = name, alpha = alpha)
 
         plots[[name]] <- gg
     }
 
-    gg <- data.list %>%
-
+    #gg <- data.list %>%
+    #      lapply(resultsMA,  plot = FALSE) %>%
+    #    combineMatrices(lengthen = FALSE) %>%
 
     plots[["combined"]] <- gg
 
@@ -159,70 +163,47 @@ listResultsMA <- function(data.list, alpha = 0.05) {
 #' @param method  Method used to produce the results
 #' @param alpha   Significance level for labelling differentially
 #'                expressed genes
-#' @param plot    Boolean, if true return plot, if false return plot data
 #'
 #' @return ggplot2 object containg MA plot
 #'
 #' @importFrom magrittr "%>%"
 #'
 #' @export
-resultsMA <- function(results, method = c("edgeR", "DESeq", "DESeq2", "voom"),
-                      alpha = 0.05, plot = TRUE) {
+resultsMA <- function(results,
+                      method = c("edgeR", "DESeq", "DESeq2", "voom", "regular"),
+                      alpha = 0.05) {
 
     # Check that a valid method has been given
     if (missing(method)) {
-        stop("Differential expression method must be specified")
+        stop("Method used to produce results must be specified")
     } else {
         method <- match.arg(method)
     }
+
+    if (method != "regular") {
+        plot.data <- results %>% regulariseResults(method = method)
+    }
+    plot.data <- plot.data %>% dplyr::mutate(DE = Significance < alpha)
 
     switch(
         method,
 
         edgeR = {
-            plot.data <- results %>%
-                         dplyr::select(FoldChange   = logFC,
-                                       Abundance    = logCPM,
-                                       Significance = FDR) %>%
-                         dplyr::mutate(DE = Significance < alpha)
-
             xlabel <- "logCPM"
             ylabel <- "logFC"
         },
 
         DESeq = {
-            plot.data <- results %>%
-                         dplyr::select(FoldChange   = log2FoldChange,
-                                       Abundance    = baseMean,
-                                       Significance = padj) %>%
-                         dplyr::mutate(Abundance = log2(Abundance)) %>%
-                         dplyr::mutate(DE = Significance < alpha)
-
             xlabel <- "log2 mean of normalised counts"
             ylabel <- expression(log[2] ~ fold ~ change)
         },
 
         DESeq2 = {
-            plot.data <- results %>%
-                         data.frame %>%
-                         dplyr::select(FoldChange   = log2FoldChange,
-                                       Abundance    = baseMean,
-                                       Significance = padj) %>%
-                         dplyr::mutate(Abundance = log2(Abundance)) %>%
-                         dplyr::mutate(DE = Significance < alpha)
-
             xlabel <- "log2 mean of normalised counts"
             ylabel <- expression(log[2] ~ fold ~ change)
         },
 
         voom = {
-            plot.data <- results %>%
-                         dplyr::select(FoldChange   = logFC,
-                                       Abundance    = AveExpr,
-                                       Significance = adj.P.Val) %>%
-                         #dplyr::mutate(Abundance = log2(Abundance)) %>%
-                         dplyr::mutate(DE = Significance < alpha)
-
             xlabel <- "log average expression"
             ylabel <- "logFC"
         }
@@ -237,14 +218,59 @@ resultsMA <- function(results, method = c("edgeR", "DESeq", "DESeq2", "voom"),
           ggplot2::geom_point() +
           ggplot2::geom_hline(yintercept = 0, colour = "blue") +
           ggplot2::scale_colour_manual(values = c("black", "red")) +
-          #ggplot2::scale_y_continuous(limits = c(-5, 5)) +
           ggplot2::xlab(xlabel) +
           ggplot2::ylab(ylabel) +
           ggplot2::theme(legend.position = "none")
 
-    if (plot) {
-        return(gg)
-    } else {
-        return(plot.data)
-    }
+    return(gg)
 }
+
+
+regulariseResults <- function(results,
+                              method = c("edgeR", "DESeq", "DESeq2", "voom") ) {
+
+    # Check that a valid method has been given
+    if (missing(method)) {
+        stop("Differential expression method must be specified")
+    } else {
+        method <- match.arg(method)
+    }
+
+    switch(
+        method,
+
+        edgeR = {
+            regular <- results %>%
+                       dplyr::select(FoldChange   = logFC,
+                                     Abundance    = logCPM,
+                                     Significance = FDR)
+        },
+
+        DESeq = {
+            regular <- results %>%
+                       dplyr::select(FoldChange   = log2FoldChange,
+                                     Abundance    = baseMean,
+                                     Significance = padj) %>%
+                       dplyr::mutate(Abundance = log2(Abundance))
+        },
+
+        DESeq2 = {
+            regular <- results %>%
+                       data.frame %>%
+                       dplyr::select(FoldChange   = log2FoldChange,
+                                     Abundance    = baseMean,
+                                     Significance = padj) %>%
+                       dplyr::mutate(Abundance = log2(Abundance))
+        },
+
+        voom = {
+            regular <- results %>%
+                       dplyr::select(FoldChange   = logFC,
+                                     Abundance    = AveExpr,
+                                     Significance = adj.P.Val)
+        }
+    )
+
+    return(regular)
+}
+
