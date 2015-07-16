@@ -341,9 +341,29 @@ to compare them. The Jaccard can be used to compare two lists and is calculated
 as the number of items in the intersect divided by the number in the union.
 
 ```{r jaccard}
-jaccardTable(tested)
+jaccardTable(tested, alpha = 0.05)
 ```
 
+From the number of genes identified by the methods we can see that _edgeR_ and
+_voom_ have called many more genes as significantly differentially expressed.
+The indices suggest that the two versions of _DESeq_ are more similar to each
+other than the other two methods. Another way to view the lists is via a Venn
+diagram. Unfortunately _ggplot2_ is not capable of these so we make use of
+another excellent package _VennDiagram_, which provides a _grid_ graphics object.
+
+```{r venn}
+venn <- vennDiagram(tested, alpha = 0.05)
+
+plot.new()
+grid::grid.draw(venn)
+text(0.5, 1, "Comparison of Lists", vfont = c("serif", "bold"), cex = 2)
+text(0.5, 0, "Number of Differentially Expressed Genes",
+     vfont = c("serif", "plain"), cex = 1.5)
+```
+
+We can see that the majority of genes were identifed by all methods and that
+those identified by _DESeq_ and _DESeq2_ are almost a subset of those from the
+other methods.
 
 Session Info
 ============

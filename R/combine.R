@@ -43,12 +43,6 @@ vennDiagram <- function(data.list, alpha = 0.05) {
                                      margin     = 0.1)
 
     return(venn)
-
-    #plot.new()
-    #grid.draw(venn)
-    #text(0.5, 1, "Comparison of Lists", vfont = c("serif", "bold"), cex = 2)
-    #text(0.5, 0, "Number of Differentially Expressed Genes",
-    #     vfont = c("serif", "plain"), cex = 1.5)
 }
 
 #' Jaccard Table
