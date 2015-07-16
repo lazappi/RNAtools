@@ -173,23 +173,28 @@ regulariseResults <- function(results,
 
         edgeR = {
             regular <- results %>%
-                       dplyr::select(FoldChange   = logFC,
-                              Abundance    = logCPM,
-                              Significance = FDR)
+                       dplyr::add_rownames() %>%
+                       dplyr::select(Gene         = rowname,
+                                     FoldChange   = logFC,
+                                     Abundance    = logCPM,
+                                     Significance = FDR)
         },
 
         DESeq = {
             regular <- results %>%
-                       dplyr::select(FoldChange   = log2FoldChange,
-                              Abundance    = baseMean,
-                              Significance = padj) %>%
+                       dplyr::select(Gene         = id,
+                                     FoldChange   = log2FoldChange,
+                                     Abundance    = baseMean,
+                                     Significance = padj) %>%
                        dplyr::mutate(Abundance = log2(Abundance))
         },
 
         DESeq2 = {
             regular <- results %>%
                        data.frame %>%
-                       dplyr::select(FoldChange   = log2FoldChange,
+                       dplyr::add_rownames() %>%
+                       dplyr::select(Gene         = rowname,
+                                     FoldChange   = log2FoldChange,
                                      Abundance    = baseMean,
                                      Significance = padj) %>%
                        dplyr::mutate(Abundance = log2(Abundance))
@@ -197,7 +202,9 @@ regulariseResults <- function(results,
 
         voom = {
             regular <- results %>%
-                       dplyr::select(FoldChange   = logFC,
+                       dplyr::add_rownames() %>%
+                       dplyr::select(Gene         = rowname,
+                                     FoldChange   = logFC,
                                      Abundance    = AveExpr,
                                      Significance = adj.P.Val)
         }
