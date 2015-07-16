@@ -365,6 +365,27 @@ We can see that the majority of genes were identifed by all methods and that
 those identified by _DESeq_ and _DESeq2_ are almost a subset of those from the
 other methods.
 
+To extract the lists of genes from each segment of the Venn diagram we can use
+the `vennGenes` function. The result is a list of vectors containing gene names.
+The name of each item in the list describes the segment and the vector contains
+the genes that are in that segment but not anywhere else. The lengths should be
+the same as the numbers in the Venn diagram.
+
+```{r venn-gene}
+venn.genes <- vennGenes(tested, alpha = 0.05)
+
+sapply(venn.genes, length)
+```
+
+The segment lists can be combined to get whichever regions are of interest. For
+example if we wanted the total list of genes.
+
+```{r all-genes}
+all.genes <- Reduce(union, venn.genes)
+
+length(all.genes)
+```
+
 Session Info
 ============
 
