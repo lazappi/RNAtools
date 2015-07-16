@@ -152,18 +152,18 @@ countBoxplots <- function(data) {
     return(gg)
 }
 
-#' List MA
+#' List Cout MA
 #'
-#' Plot MA plots from a list of matrices
+#' Plot MA plots from a list of count matrices
 #'
-#' @param data.list List of matrices to plot
+#' @param data.list List of count matrices to plot
 #'
 #' @return List of ggplot2 object containing MA plots
 #'
 #' @importFrom magrittr "%>%"
 #'
 #' @export
-listMA <- function(data.list) {
+listCountMA <- function(data.list) {
 
     plots <- list()
 

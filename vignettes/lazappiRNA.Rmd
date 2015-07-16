@@ -176,7 +176,7 @@ Pairwise MA plots show the difference in expression for genes in two samples
 compared to the average expression of the two samples.
 
 ```{r ma-plots}
-ma.plots <- listMA(transformed)
+ma.plots <- listCountMA(transformed)
 
 ma.plots$combined
 ```
