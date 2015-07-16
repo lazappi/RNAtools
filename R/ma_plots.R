@@ -117,6 +117,40 @@ getMAData <- function(data) {
     return(ma.data)
 }
 
+#' List Results MA
+#'
+#' Plot MA plots from a list of differential expression results
+#'
+#' @param data.list List of results to plot
+#' @param alpha     Significance level for labelling differentially
+#'                  expressed genes
+#'
+#' @return List of ggplot2 object containing MA plots
+#'
+#' @importFrom magrittr "%>%"
+#'
+#' @export
+listResultsMA <- function(data.list, alpha = 0.05) {
+
+    plots <- list()
+
+    for (name in names(data.list)) {
+
+        data = data.list[[name]]
+
+        gg <- resultsMA(data, method = name, alpha = alpha)
+
+        plots[[name]] <- gg
+    }
+
+    gg <- data.list %>%
+
+
+    plots[["combined"]] <- gg
+
+    return(plots)
+}
+
 #' Results MA
 #'
 #' Produce an MA plot from results of a differential expression test
