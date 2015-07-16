@@ -176,7 +176,7 @@ Pairwise MA plots show the difference in expression for genes in two samples
 compared to the average expression of the two samples.
 
 ```{r ma-plots}
-ma.plots <- listMA(transformed)
+ma.plots <- listCountMA(transformed)
 
 ma.plots$combined
 ```
@@ -291,6 +291,30 @@ group1 <- "HEK293T"
 group2 <- "Ramos B cell"
 
 tested <- listTest(normalised, group1, group2)
+```
+
+We can now produce MA plots of our results.
+
+```{r results-MA}
+results.ma <- listResultsMA(tested, alpha = 0.05)
+
+results.ma$combined
+```
+
+Here we plot log average expression level against the log fold change estimated
+by each method. The genes with adjust p-values greater than alpha are coloured
+in red, the blue line indicates log fold change equal to zero and the shaded
+area log fold change with magnitude less than two. 
+
+The individual packages have their own functions for creating these plots. In
+particular _edgeR's_ `plotSmear` may be worthwhile examining as it adds some
+additional features.
+
+```{r plotSmear}
+genes.de.names <- rownames(tested$edgeR)[tested$edgeR$FDR < 0.05]
+edgeR::plotSmear(normalised$edgeR, de.tags = genes.de.names)
+
+rm(genes.de.names)
 ```
 
 Session Info
