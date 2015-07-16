@@ -1,0 +1,53 @@
+#' Volcano Plot
+#'
+#' Produce a volcano plot from differential expression results
+#'
+#' @param results Results to plot
+#' @param method  Method used to produce the results
+#'
+#' @return ggplot2 object containg volcano plot
+#'
+#' @importFrom magrittr "%>%"
+#'
+#' @export
+volcanoPlot <- function(results,
+                        method = c("edgeR", "DESeq", "DESeq2",
+                                   "voom", "regular")) {
+
+    # Check that a valid method has been given
+    if (missing(method)) {
+        stop("Method used to produce results must be specified")
+    } else {
+        method <- match.arg(method)
+    }
+
+    if (method != "regular") {
+        results <- results %>% regulariseResults(method = method)
+    }
+
+    plot.data <- results %>%
+                 dplyr::mutate(logSig = -log(Significance)) %>%
+                 dplyr::mutate(absFC = abs(FoldChange)) %>%
+                 dplyr::mutate(absFC = replace(absFC, !is.finite(absFC),
+                                               max(absFC[is.finite(absFC)])))
+
+
+    gg <- ggplot2::ggplot(plot.data,
+                          ggplot2::aes(x      = FoldChange, y = logSig,
+                                       colour = logSig, alpha = absFC)) +
+          ggplot2::annotate("rect",
+                            xmin = -Inf, xmax = Inf,
+                            ymin = -Inf, ymax = -log(0.05),
+                            alpha = 0.2, fill = "blue", size = 0) +
+          ggplot2::annotate("rect",
+                            xmin = -2,   xmax = 2,
+                            ymin = -Inf, ymax = Inf,
+                            alpha = 0.2, fill = "red", size = 0) +
+          ggplot2::geom_point(size = 4) +
+          ggplot2::scale_color_gradient(low = "#3f007d", high = "#ef3b2c") +
+          ggplot2::xlab("log Fold Change") +
+          ggplot2::ylab("-log Significance") +
+          ggplot2::theme(legend.position = "none")
+
+    return(gg)
+}
