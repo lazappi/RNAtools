@@ -29,6 +29,7 @@ listVolcano <- function(data.list) {
     gg <- regular.data.list %>%
           combineMatrices(lengthen = FALSE) %>%
           dplyr::mutate(logSig = -log(Significance)) %>%
+          dplyr::mutate(logSig = replace(logSig, is.na(logSig), -Inf)) %>%
           dplyr::mutate(absFC = abs(FoldChange)) %>%
           dplyr::mutate(absFC = replace(absFC, !is.finite(absFC),
                                         max(absFC[is.finite(absFC)]))) %>%
@@ -84,10 +85,10 @@ volcanoPlot <- function(results,
 
     plot.data <- results %>%
                  dplyr::mutate(logSig = -log(Significance)) %>%
+                 dplyr::mutate(logSig = replace(logSig, is.na(logSig), -Inf)) %>%
                  dplyr::mutate(absFC = abs(FoldChange)) %>%
                  dplyr::mutate(absFC = replace(absFC, !is.finite(absFC),
                                                max(absFC[is.finite(absFC)])))
-
 
     gg <- ggplot2::ggplot(plot.data,
                           ggplot2::aes(x      = FoldChange, y = logSig,
