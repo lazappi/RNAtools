@@ -27,20 +27,20 @@ vennDiagram <- function(data.list, alpha = 0.05) {
 
     venn <- VennDiagram::venn.diagram(gene.lists,
                                       filename   = NULL,
-                                     height     = 3000,
-                                     width      = 3000,
-                                     resolution = 500,
-                                     col        = "transparent",
-                                     fill       = colours,
-                                     alpha      = 0.4,
-                                     cex        = 1.5,
-                                     fontfamily = "sans",
-                                     fontface   = "bold",
-                                     cat.col    = colours,
-                                     cat.cex    = 1.5,
-                                     cat.pos    = 0,
-                                     cat.dist   = 0.05,
-                                     margin     = 0.1)
+                                      height     = 3000,
+                                      width      = 3000,
+                                      resolution = 500,
+                                      col        = "transparent",
+                                      fill       = colours,
+                                      alpha      = 0.4,
+                                      cex        = 1.5,
+                                      fontfamily = "sans",
+                                      fontface   = "bold",
+                                      cat.col    = colours,
+                                      cat.cex    = 1.5,
+                                      cat.pos    = 0,
+                                      cat.dist   = 0.05,
+                                      margin     = 0.1)
 
     return(venn)
 }
