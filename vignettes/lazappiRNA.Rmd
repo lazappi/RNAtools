@@ -14,7 +14,7 @@ vignette: >
 # Changing these will change them for all chunks unless otherwise set
 knitr::opts_chunk$set(
                         autodep        = TRUE,
-                        cache          = FALSE,
+                        cache          = TRUE,
                         cache.comments = TRUE,
                         collapse       = TRUE,
                         comment        = "##",
@@ -264,7 +264,36 @@ for(object in objects) {
 **NOTE:** It is important that the names of this list are not changed as they
 will be used by following functions to identify which method to apply.
 
-Normalistion
+Filtering
+=========
+
+Many genes in any RNA-seq dataset are uninformative simply because they have
+zero or very few reads. These genes don't affect the results immediately as they 
+will the differential expression tests, however they can affect how other genes
+are treated. More genes means more tests which affects the procedures used to 
+correct for multiple testing. By removing low-expression genes we reduce the
+number of tests and possibly increase the number of genes found to be
+significantly differentially expressed.
+
+The _HTSFilter_ package provides a method for independently filtering genes in 
+datasets with biological replicates. There several stages of the process where
+filtering could theoretically be applied. For the rest of vignette filtering
+will be applied when suggested by the authors of _HTSFilter_. Unfortunately this
+is different for each method and can't be automated. For example for _voom_ no
+methods for normalised datasets exist so the most appropriate stage is on the
+raw counts.
+
+```{r filtering}
+filtered <- HTSFilter(objects$voom)
+objects$voom <- filtered$filteredData
+```
+
+If you prefer not to use _HTSFilter_ (for example if you don't have biological
+replicates) the authors of _edgeR_ suggest an alternative approach where genes
+are removed if they have CPM less than one in at least the number of samples as
+the size of the smallest group.
+
+Normalisation
 ============
 
 Each package has its own normalisation procedures. Here we use the `listNorm`
