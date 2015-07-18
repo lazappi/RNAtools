@@ -251,7 +251,7 @@ is provided to easily convert a matrix of counts into the appropriate objects
 for multiple packages, returned as a list.
 
 ```{r objects}
-objects <- counts2Objects(counts, groups,
+objects <- counts2Objects(counts, groups, filter = TRUE,
                           methods = c("edgeR", "DESeq", "DESeq2", "voom"))
 
 names(objects)
@@ -264,8 +264,8 @@ for(object in objects) {
 **NOTE:** It is important that the names of this list are not changed as they
 will be used by following functions to identify which method to apply.
 
-Filtering
-=========
+A Note on Filtering
+===================
 
 Many genes in any RNA-seq dataset are uninformative simply because they have
 zero or very few reads. These genes don't affect the results immediately as they 
@@ -277,25 +277,30 @@ significantly differentially expressed.
 
 The _HTSFilter_ package provides a method for independently filtering genes in 
 datasets with biological replicates. There several stages of the process where
-filtering could theoretically be applied. For the rest of vignette filtering
-will be applied when suggested by the authors of _HTSFilter_. Unfortunately this
-is different for each method and can't be automated. For example for _voom_ no
-methods for normalised datasets exist so the most appropriate stage is on the
-raw counts.
+filtering could theoretically be applied. By setting the `filter` option in
+`counts2objects` and related functions we conduct filtering when suggested by
+the _HTSFilter_ author. Unfortunately the appropriate stage is different for
+eachmethod. For example for _voom_ no methods for normalised datasets exist so
+the most appropriate stage is when constructing objects from the raw counts.
 
 ```{r filtering}
-nrow(objects$voom$counts)
-
-filtered <- HTSFilter(objects$voom)
-objects$voom <- filtered$filteredData
+nrow(counts)
 
 nrow(objects$voom$counts)
 ```
 
+ _HTSFilter_ can produce a plot that shows how the filtering threshold is chosen. 
+Basically it attempts to find that a value that removes the same number of
+genes from each group of samples. To avoid cluttering analysis this plot is
+suppresed by a message showing the chosen threshold is printed to the console.
+
 If you prefer not to use _HTSFilter_ (for example if you don't have biological
 replicates) the authors of _edgeR_ suggest an alternative approach where genes
 are removed if they have CPM less than one in at least the number of samples as
-the size of the smallest group.
+the size of the smallest group. In addition _DESeq2_ has it's own independent
+filtering procedure. If `filter` is set to `TRUE` at the testing stage this will
+be turned off as _HTSFilter_ is assumed to be applied at the normalisation
+stage.
 
 Normalisation
 ============
@@ -323,7 +328,7 @@ a list function allows use to perform all methods simultaneously.
 group1 <- "HEK293T"
 group2 <- "Ramos B cell"
 
-tested <- listTest(normalised, group1, group2)
+tested <- listTest(normalised, group1, group2, filter = TRUE)
 ```
 
 We can now produce MA plots of our results.
