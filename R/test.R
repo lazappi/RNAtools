@@ -4,13 +4,14 @@
 #' expression objects
 #'
 #' @param data.list List of normalised differential expression objects
-#' @param group1 First group to test, the reference or control
-#' @param group2 Second group to test, the treatment
+#' @param group1    First group to test, the reference or control
+#' @param group2    Second group to test, the treatment
+#' @param filter    Boolean, whether to apply HTSFilter
 #'
 #' @return List of test result objects
 #'
 #' @export
-listTest <- function(data.list, group1, group2) {
+listTest <- function(data.list, group1, group2, filter, objects = NULL) {
 
     tested <- list()
 
@@ -22,20 +23,20 @@ listTest <- function(data.list, group1, group2) {
             name,
 
             "edgeR" = {
-                test <- edgeRTest(data, group1, group2)
+                test <- edgeRTest(data, group1, group2, filter)
             },
 
             "DESeq" = {
-                test <- deseqTest(data, group1, group2)
+                test <- deseqTest(data, group1, group2, filter)
             },
 
             "DESeq2" = {
-                test <- deseq2Test(data, group1, group2)
+                test <- deseq2Test(data, group1, group2, filter)
             },
 
             "voom" = {
                 test <- voomTest(data, group1, group2)
-            },
+            }
         )
 
         tested[[name]] <- test
@@ -48,17 +49,27 @@ listTest <- function(data.list, group1, group2) {
 #'
 #' Test a normalised DGEList object using edgeR
 #'
-#' @param dge Normalised DGEList object to test
+#' @param dge    Normalised DGEList object to test
 #' @param group1 First group to test, the reference or control
 #' @param group2 Second group to test, the treatment
+#' @param filter Boolean, whether to apply HTSFilter
 #'
 #' @return dataframe containing test results
 #'
 #' @export
-edgeRTest <- function(dge, group1, group2) {
+edgeRTest <- function(dge, group1, group2, filter) {
 
     genes.de <- edgeR::exactTest(dge, pair = c(group1, group2))
-    top.tags <- edgeR::topTags(genes.de, n = nrow(dge))
+
+    if (filter) {
+        filtered <- HTSFilter::HTSFilter(genes.de, DGEList = dge, plot = FALSE)
+        genes.de <- filtered$filteredData
+
+        message(paste("HTSFilter threshold:", filtered$s,
+                      "Genes Filtered:", nrow(dge$counts) - nrow(genes.de)))
+    }
+
+    top.tags <- edgeR::topTags(genes.de, n = nrow(genes.de))
 
     return(top.tags$table)
 }
@@ -68,13 +79,23 @@ edgeRTest <- function(dge, group1, group2) {
 #' Testa a normalised CountDataSet object using DESeq
 #'
 #' @param count.data Normalised CountDataSet object to test
-#' @param group1 First group to test, the reference or control
-#' @param group2 Second group to test, the treatment
+#' @param group1     First group to test, the reference or control
+#' @param group2     Second group to test, the treatment
+#' @param filter     Boolean, whether to apply HTSFilter
 #'
 #' @return dataframe containing test results
 #'
 #' @export
-deseqTest <- function(count.data, group1, group2) {
+deseqTest <- function(count.data, group1, group2, filter) {
+
+    if (filter) {
+        n.start <- nrow(count.data)
+        filtered <- HTSFilter::HTSFilter(count.data, plot = FALSE)
+        count.data <- filtered$filteredData
+
+        message(paste("HTSFilter threshold:", filtered$s,
+                      "Genes Filtered:", n.start - nrow(count.data)))
+    }
 
     results <- DESeq::nbinomTest(count.data, group1, group2)
     results <- results[order(results$padj), ]

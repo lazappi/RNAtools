@@ -4,7 +4,7 @@
 \alias{listTest}
 \title{List Test}
 \usage{
-listTest(data.list, group1, group2)
+listTest(data.list, group1, group2, filter, objects = NULL)
 }
 \arguments{
 \item{data.list}{List of normalised differential expression objects}
@@ -12,6 +12,8 @@ listTest(data.list, group1, group2)
 \item{group1}{First group to test, the reference or control}
 
 \item{group2}{Second group to test, the treatment}
+
+\item{filter}{Boolean, whether to apply HTSFilter to edgeR}
 }
 \value{
 List of test result objects
