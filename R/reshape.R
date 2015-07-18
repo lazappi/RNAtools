@@ -136,7 +136,12 @@ counts2voom <- function(data, groups, filter) {
     dge <- edgeR::DGEList(data, group = groups)
 
     if (filter) {
-        dge <- HTSFilter::HTSFilter(dge)
+        filtered <- HTSFilter::HTSFilter(dge, plot = FALSE)
+        dge <- filtered$filteredData
+
+        message(paste("HTSFilter threshold:", filtered$s,
+                      "Genes Filtered:", nrow(data) - nrow(dge$counts)))
+
     }
 
     return(dge)
