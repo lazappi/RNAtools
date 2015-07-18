@@ -4,7 +4,7 @@
 \alias{edgeRTest}
 \title{edgeR Test}
 \usage{
-edgeRTest(dge, group1, group2)
+edgeRTest(dge, group1, group2, filter)
 }
 \arguments{
 \item{dge}{Normalised DGEList object to test}
@@ -12,6 +12,8 @@ edgeRTest(dge, group1, group2)
 \item{group1}{First group to test, the reference or control}
 
 \item{group2}{Second group to test, the treatment}
+
+\item{filter}{Boolean, whether to apply HTSFilter}
 }
 \value{
 dataframe containing test results

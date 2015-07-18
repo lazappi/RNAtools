@@ -1,6 +1,7 @@
-#' Venn Diagram
+#' Gene Venn Diagram
 #'
-#' Produce a Venn diagram from a list of differential expression results
+#' Produce a Venn diagram of significant genes from a list of differential
+#' expression results
 #'
 #' @param data.list List of results to combine
 #' @param alpha     Significance level for selecting genes
@@ -10,7 +11,7 @@
 #' @importFrom magrittr "%>%"
 #'
 #' @export
-vennDiagram <- function(data.list, alpha = 0.05) {
+geneVenn <- function(data.list, alpha = 0.05) {
 
     gene.lists <- list()
 
@@ -27,20 +28,20 @@ vennDiagram <- function(data.list, alpha = 0.05) {
 
     venn <- VennDiagram::venn.diagram(gene.lists,
                                       filename   = NULL,
-                                     height     = 3000,
-                                     width      = 3000,
-                                     resolution = 500,
-                                     col        = "transparent",
-                                     fill       = colours,
-                                     alpha      = 0.4,
-                                     cex        = 1.5,
-                                     fontfamily = "sans",
-                                     fontface   = "bold",
-                                     cat.col    = colours,
-                                     cat.cex    = 1.5,
-                                     cat.pos    = 0,
-                                     cat.dist   = 0.05,
-                                     margin     = 0.1)
+                                      height     = 3000,
+                                      width      = 3000,
+                                      resolution = 500,
+                                      col        = "transparent",
+                                      fill       = colours,
+                                      alpha      = 0.4,
+                                      cex        = 1.5,
+                                      fontfamily = "sans",
+                                      fontface   = "bold",
+                                      cat.col    = colours,
+                                      cat.cex    = 1.5,
+                                      cat.pos    = 0,
+                                      cat.dist   = 0.05,
+                                      margin     = 0.1)
 
     return(venn)
 }

@@ -24,4 +24,5 @@ Imports: DESeq,
     RColorBrewer,
     limma,
     genefilter,
-    VennDiagram
+    VennDiagram,
+    HTSFilter

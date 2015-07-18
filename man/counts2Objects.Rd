@@ -4,13 +4,15 @@
 \alias{counts2Objects}
 \title{Counts to Objects}
 \usage{
-counts2Objects(data, groups, methods = c("edgeR", "DESeq", "DESeq2", "voom"),
-  verbose = TRUE)
+counts2Objects(data, groups, filter, methods = c("edgeR", "DESeq", "DESeq2",
+  "voom"), verbose = TRUE)
 }
 \arguments{
 \item{data}{Matrix of counts}
 
 \item{groups}{Vector of groups for each sample column}
+
+\item{filter}{Boolean, whether to use HTSFilter for voom}
 
 \item{methods}{Vector of object types to convert to}
 

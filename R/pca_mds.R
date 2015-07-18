@@ -18,7 +18,7 @@ listPCA <- function(data.list, top = nrow(data.list[[1]]),
 
     for (name in names(data.list)) {
 
-        gg <- plotPCA(data.list[[name]], top = top , group = groups) +
+        gg <- samplePCA(data.list[[name]], top = top , group = groups) +
               ggplot2::ggtitle(paste(name," - PC1 vs PC2, top", top,
                                      "variable genes"))
 
@@ -26,7 +26,7 @@ listPCA <- function(data.list, top = nrow(data.list[[1]]),
     }
 
     gg <- data.list %>%
-          lapply(plotPCA, top = top, group = groups, plot = FALSE) %>%
+          lapply(samplePCA, top = top, group = groups, plot = FALSE) %>%
           combineMatrices(lengthen = FALSE) %>%
           ggplot2::ggplot(ggplot2::aes(x = PC1, y = PC2, colour = Group,
                                      label = Sample)) +
@@ -47,7 +47,7 @@ listPCA <- function(data.list, top = nrow(data.list[[1]]),
     return(plots)
 }
 
-#' Plot PCA
+#' Sample PCA Plot
 #'
 #' Produce a PCA plot from a matrix using ggplot2
 #'
@@ -61,7 +61,7 @@ listPCA <- function(data.list, top = nrow(data.list[[1]]),
 #' @importFrom magrittr "%>%"
 #'
 #' @export
-plotPCA <- function(data, top = nrow(data), groups = colnames(data),
+samplePCA <- function(data, top = nrow(data), groups = colnames(data),
                     plot = TRUE) {
 
     top.data <- data %>%
@@ -101,7 +101,7 @@ plotPCA <- function(data, top = nrow(data), groups = colnames(data),
     }
 }
 
-#' Plot MDS
+#' Sample MDS plot
 #'
 #' Produce a MDS plot from a matrix using ggplot2. Based on the limma function.
 #'
@@ -117,7 +117,7 @@ plotPCA <- function(data, top = nrow(data), groups = colnames(data),
 #' @importFrom magrittr "%>%"
 #'
 #' @export
-plotMDS <- function(data, top = nrow(data), groups = colnames(data),
+sampleMDS <- function(data, top = nrow(data), groups = colnames(data),
                     plot = TRUE, selection = c("pairwise", "common")) {
 
     if (missing(selection)) {
@@ -213,7 +213,7 @@ listMDS <- function(data.list, top = nrow(data.list[[1]]),
 
     for (name in names(data.list)) {
 
-        gg <- plotMDS(data.list[[name]], top = top , group = groups,
+        gg <- sampleMDS(data.list[[name]], top = top , group = groups,
                       selection = selection) +
               ggplot2::ggtitle(paste(name," - MDS Plot, top", top,
                                      selection, "variable genes"))
@@ -228,7 +228,7 @@ listMDS <- function(data.list, top = nrow(data.list[[1]]),
     }
 
     gg <- data.list %>%
-        lapply(plotMDS, top = top, group = groups, plot = FALSE,
+        lapply(sampleMDS, top = top, group = groups, plot = FALSE,
                selection = selection) %>%
         combineMatrices(lengthen = FALSE) %>%
         ggplot2::ggplot(ggplot2::aes(x = X, y = Y, colour = Group,
