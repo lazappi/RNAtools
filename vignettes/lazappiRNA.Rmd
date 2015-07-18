@@ -64,13 +64,13 @@ combination of results.
 Before we get started let's load some packages we will need:
 
 ```{r libraries}
-library(lazappiRNA)
-
 # Plotting
 library(ggplot2)
 
 # RNA-seq
 library(HTSFilter)
+
+library(lazappiRNA)
 ```
 
 Data
@@ -284,8 +284,12 @@ methods for normalised datasets exist so the most appropriate stage is on the
 raw counts.
 
 ```{r filtering}
+nrow(objects$voom$counts)
+
 filtered <- HTSFilter(objects$voom)
 objects$voom <- filtered$filteredData
+
+nrow(objects$voom$counts)
 ```
 
 If you prefer not to use _HTSFilter_ (for example if you don't have biological
@@ -381,7 +385,7 @@ diagram. Unfortunately _ggplot2_ is not capable of these so we make use of
 another excellent package _VennDiagram_, which provides a _grid_ graphics object.
 
 ```{r venn}
-venn <- vennDiagram(tested, alpha = 0.05)
+venn <- geneVenn(tested, alpha = 0.05)
 
 plot.new()
 grid::grid.draw(venn)

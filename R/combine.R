@@ -1,6 +1,7 @@
-#' Venn Diagram
+#' Gene Venn Diagram
 #'
-#' Produce a Venn diagram from a list of differential expression results
+#' Produce a Venn diagram of significant genes from a list of differential
+#' expression results
 #'
 #' @param data.list List of results to combine
 #' @param alpha     Significance level for selecting genes
@@ -10,7 +11,7 @@
 #' @importFrom magrittr "%>%"
 #'
 #' @export
-vennDiagram <- function(data.list, alpha = 0.05) {
+geneVenn <- function(data.list, alpha = 0.05) {
 
     gene.lists <- list()
 
