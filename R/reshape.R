@@ -53,13 +53,14 @@ combineMatrices <- function(data.list, lengthen = TRUE) {
 #'
 #' @param data    Matrix of counts
 #' @param groups  Vector of groups for each sample column
+#' @param filter  Boolean, whether to use HTSFilter for voom
 #' @param methods Vector of object types to convert to
 #' @param verbose Boolean, whether to print messages showing progress
 #'
 #' @return List of converted objects
 #'
 #' @export
-counts2Objects <- function(data, groups,
+counts2Objects <- function(data, groups, filter,
                            methods = c("edgeR", "DESeq", "DESeq2", "voom"),
                            verbose = TRUE) {
 
@@ -88,7 +89,7 @@ counts2Objects <- function(data, groups,
 
             voom = {
                 if (verbose) {message("Creating voom object...")}
-                objects$voom <- counts2edgeR(data, groups)
+                objects$voom <- counts2voom(data, groups, filter)
             },
 
             stop(paste("Method", method, "not recognised. Allowed methods are:",
@@ -115,6 +116,28 @@ counts2Objects <- function(data, groups,
 counts2edgeR <- function(data, groups) {
 
     dge <- edgeR::DGEList(data, group = groups)
+
+    return(dge)
+}
+
+#' Counts to voom
+#'
+#' Convert a count matrix to an edgeR DGEList object for voom
+#'
+#' @param data   Matrix of counts
+#' @param groups Vector of groups for each sample column
+#' @param filter Boolean, whether to apply HTSFilter
+#'
+#' @return DGEList object containing counts
+#'
+#' @export
+counts2voom <- function(data, groups, filter) {
+
+    dge <- edgeR::DGEList(data, group = groups)
+
+    if (filter) {
+        dge <- HTSFilter::HTSFilter(dge)
+    }
 
     return(dge)
 }
