@@ -13,7 +13,7 @@ listTest(data.list, group1, group2, filter, objects = NULL)
 
 \item{group2}{Second group to test, the treatment}
 
-\item{filter}{Boolean, whether to apply HTSFilter to edgeR}
+\item{filter}{Boolean, whether to apply HTSFilter}
 }
 \value{
 List of test result objects
