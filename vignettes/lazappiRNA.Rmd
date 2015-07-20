@@ -444,6 +444,43 @@ all.genes <- Reduce(union, venn.genes)
 length(all.genes)
 ```
 
+Quick Analysis
+==============
+
+If you are just in interested in quickly getting results here is an example of
+the steps using the _Pasilla_ dataset. This section requires you to install the
+_pasilla_ and _Biobase_ packages.
+
+```{r pasilla}
+if (requireNamespace("pasilla", quietly = TRUE) &&
+        requireNamespace("Biobase", quietly = TRUE)) {
+    
+    data("pasillaGenes", package = "pasilla")
+    
+    group1 <- "untreated"
+    group2 <- "treated"
+    
+    counts <- counts(pasillaGenes)
+    groups <- factor(pData(pasillaGenes)[, c("condition")])
+    groups <- relevel(groups, ref = "untreated")
+    
+    objects <- counts2Objects(counts, groups = groups, 
+                              methods = c("edgeR", "DESeq", "DESeq2", "voom"),
+                              filter = TRUE)
+    normalised <- listNorm(objects)
+    tested <- listTest(normalised, group1 = group1, group2 = group2,
+                       filter = TRUE)
+    
+    venn <- geneVenn(tested, alpha = 0.05)
+
+    plot.new()
+    grid::grid.draw(venn)
+    text(0.5, 1, "Comparison of Lists", vfont = c("serif", "bold"), cex = 2)
+    text(0.5, 0, "Number of Differentially Expressed Genes",
+         vfont = c("serif", "plain"), cex = 1.5)
+}
+```
+
 Session Info
 ============
 
