@@ -331,6 +331,26 @@ group2 <- "Ramos B cell"
 tested <- listTest(normalised, group1, group2, filter = TRUE)
 ```
 
+Before we examine the results we should first inspect the (unadjusted) pvalues.
+The distribution of p-values should consist of a uniform distribution according
+to the null hypothesis and a peak at low p-values for significant results that
+reject the null. We can easily look at the distribution of our results.
+
+```{r p-values}
+pval.plots <- listPlotPvals(tested)
+
+pval.plots$combined
+```
+
+Our results seem have been computed correctly. We see a consistent rectangle
+across most p-values with significant peaks at low values suggesting that there
+are many differently expressed genes. Here the shaded red area shows p-values
+less than 0.05. If you were to see a different pattern, such as hill or u-shaped
+that may suggest a problem with the assumed variance of the null distribution.
+For methods such as _DESeq2_ and _voom_ that report test statistics as well as
+p-values this can be corrected using the package _fdrtool_. From here on we
+only discuss p-values corrected for multiple testing.
+
 We can now produce MA plots of our results.
 
 ```{r results-MA}
