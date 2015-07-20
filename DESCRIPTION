@@ -1,15 +1,16 @@
-Package: lazappiRNA
-Title: lazappiRNA - Functions for processing RNA-seq data
+Package: RNAtools
+Title: RNAtools - Functions for processing RNA-seq data
 Version: 0.0.0.9000
 Authors@R: person("Luke", "Zappia", email = "luke.zappia@gmail.com",
                   role = c("aut", "cre"))
-Description: Functions for processing RNA-seq data used in my Masters research
-             project
+Description: Functions for processing RNA-seq data using multiple methods.
+             Provides consistent interfaces for normalisation, testing,
+             visualisation etc.
 Depends: R (>= 3.2.1)
 License: Simplified BSD
 LazyData: true
-URL: http://github.com/lazappi/lazappiRNA
-BugReports: http://github.com/lazappi/lazappiRNA/issues
+URL: http://github.com/lazappi/RNAtools
+BugReports: http://github.com/lazappi/RNAtools/issues
 Suggests: knitr,
     pasilla,
     Biobase
