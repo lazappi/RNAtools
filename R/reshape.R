@@ -205,7 +205,8 @@ regulariseResults <- function(results,
                        dplyr::select(Gene         = rowname,
                                      FoldChange   = logFC,
                                      Abundance    = logCPM,
-                                     Significance = FDR)
+                                     Significance = FDR,
+                                     pValue       = PValue)
         },
 
         DESeq = {
@@ -213,7 +214,8 @@ regulariseResults <- function(results,
                        dplyr::select(Gene         = id,
                                      FoldChange   = log2FoldChange,
                                      Abundance    = baseMean,
-                                     Significance = padj) %>%
+                                     Significance = padj,
+                                     pValue       = pval) %>%
                        dplyr::mutate(Abundance = log2(Abundance))
         },
 
@@ -224,7 +226,8 @@ regulariseResults <- function(results,
                        dplyr::select(Gene         = rowname,
                                      FoldChange   = log2FoldChange,
                                      Abundance    = baseMean,
-                                     Significance = padj) %>%
+                                     Significance = padj,
+                                     pValue       = pvalue) %>%
                        dplyr::mutate(Abundance = log2(Abundance))
         },
 
@@ -234,7 +237,8 @@ regulariseResults <- function(results,
                        dplyr::select(Gene         = rowname,
                                      FoldChange   = logFC,
                                      Abundance    = AveExpr,
-                                     Significance = adj.P.Val)
+                                     Significance = adj.P.Val,
+                                     pValue       = P.Value)
         }
     )
 
