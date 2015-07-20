@@ -3,17 +3,19 @@
 #' Plot hitograms of p-values from a list of differential expression results
 #'
 #' @param data.list List of results to plot
+#' @param alpha     Significance level for shading
 #'
 #' @return List of ggplot2 objects containing p-value histograms
 #'
 #' @importFrom magrittr "%>%"
 #'
 #' @export
-listPlotPvals <- function(data.list) {
+listPlotPvals <- function(data.list, alpha = 0.05) {
 
     plots <- list()
     regular.data.list <- list()
 
+    # Produce individual plots
     for (name in names(data.list)) {
 
         data <- data.list[[name]]
@@ -26,11 +28,12 @@ listPlotPvals <- function(data.list) {
         plots[[name]] <- gg
     }
 
+    # Produce combine plot
     gg <- regular.data.list %>%
           combineMatrices(lengthen = FALSE) %>%
           ggplot2::ggplot(ggplot2::aes(x = pValue)) +
           ggplot2::annotate("rect",
-                            xmin = -Inf, xmax = 0.05,
+                            xmin = -Inf, xmax = alpha,
                             ymin = -Inf, ymax = Inf,
                             alpha = 0.2, fill = "red", size = 0) +
           ggplot2::geom_histogram(binwidth = 0.025) +
@@ -49,6 +52,7 @@ listPlotPvals <- function(data.list) {
 #'
 #' @param results Results to plot
 #' @param method  Method used to produce the results
+#' @param alpha   Significance level for shading
 #'
 #' @return ggplot2 object containg p-value histogram
 #'
@@ -56,8 +60,9 @@ listPlotPvals <- function(data.list) {
 #'
 #' @export
 plotPvals <- function(results,
-                        method = c("edgeR", "DESeq", "DESeq2",
-                                   "voom", "regular")) {
+                      method = c("edgeR", "DESeq", "DESeq2",
+                                 "voom", "regular"),
+                      alpha = 0.05) {
 
     # Check that a valid method has been given
     if (missing(method)) {
@@ -72,7 +77,7 @@ plotPvals <- function(results,
 
     gg <- ggplot2::ggplot(results, ggplot2::aes(x = pValue)) +
           ggplot2::annotate("rect",
-                            xmin = -Inf, xmax = 0.05,
+                            xmin = -Inf, xmax = alpha,
                             ymin = -Inf, ymax = Inf,
                             alpha = 0.2, fill = "red", size = 0) +
           ggplot2::geom_histogram(binwidth = 0.025) +

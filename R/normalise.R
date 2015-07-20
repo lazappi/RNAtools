@@ -4,17 +4,20 @@
 #' objects
 #'
 #' @param data.list List of differential expression objects
+#' @param verbose Boolean, whether to print messages showing progress
 #'
 #' @return List of normalised objects
 #'
 #' @export
-listNorm <- function(data.list) {
+listNorm <- function(data.list, verbose = TRUE) {
 
     normalised <- list()
 
     for (name in names(data.list)) {
 
         data <- data.list[[name]]
+
+        if (verbose) {message(paste0("Normalising ", name, "..."))}
 
         switch(
             name,
@@ -34,6 +37,9 @@ listNorm <- function(data.list) {
             "voom" = {
                 norm <- voomNorm(data)
             },
+
+            stop(paste("Method", name, "not recognised. Allowed methods are:",
+                       "edgeR/DESeq/DESeq2/voom"))
         )
 
         normalised[[name]] <- norm
@@ -90,7 +96,7 @@ deseqNorm <- function(count.data) {
 #' @export
 deseq2Norm <- function(count.data) {
 
-    count.data <- DESeq2::DESeq(count.data)
+    count.data <- DESeq2::DESeq(count.data, quiet = TRUE)
 
     return(count.data)
 }

@@ -4,7 +4,7 @@
 #'
 #' @param data    Matrix of raw counts
 #' @param methods Vector of transformation methods to apply, choices are "log",
-#'                "vst", "rlog" and "cpm".
+#'                "vst", "rlog", "cpm" and "logCPM".
 #' @param verbose Boolean, whether to print messages showing progress
 #'
 #' @return List of transformed matrices
@@ -24,6 +24,7 @@ transformCounts <- function(data, methods, verbose = TRUE) {
 
     transformed <- list()
 
+    # Apply the selected transformations
     for (method in methods) {
         switch(
             method,
@@ -78,6 +79,7 @@ transformCounts <- function(data, methods, verbose = TRUE) {
 #'
 #' @export
 logTransform <- function(data) {
+
     transformed <- log2(data + 1)
 
     return(transformed)
@@ -99,6 +101,7 @@ vstTransform <- function(data) {
     count.data <- DESeq::estimateSizeFactors(count.data)
     count.data <- DESeq::estimateDispersions(count.data, method = "blind")
 
+    # Apply transformation
     transformed <-DESeq::getVarianceStabilizedData(count.data)
 
     return(transformed)

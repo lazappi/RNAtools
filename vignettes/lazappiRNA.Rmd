@@ -56,21 +56,15 @@ the biological implications of these changes in regulation.
 
 Multiple methods exist for each of these steps. This package takes a matrix of
 summarised counts for a group of samples and provides a unified interface for
-differential expression testing (using edgeR, DESeq, DESeq2 and limma-voom) and
-functional analysis. The aim is allow simultaneous analysis using multiple
-packages including robust quality control, easily comparable visulisations and
-combination of results.
+differential expression testing (using _edgeR_, _DESeq_, _DESeq2_ and
+_limma-voom_) and functional analysis. The aim is allow simultaneous analysis 
+using multiple packages including robust quality control, easily comparable 
+visulisations and combination of results.
 
-Before we get started let's load some packages we will need:
+Before we get started let's load the _lazappiRNA_ package:
 
 ```{r libraries}
-# Plotting
-library(ggplot2)
-
-# RNA-seq
-library(HTSFilter)
-
-library(lazappiRNA)
+library("lazappiRNA")
 ```
 
 Data
@@ -81,11 +75,13 @@ from the _HTSFilter_ package. This dataset contains two biological replicates
 from a human embryonic kidney and B cell line. The raw read count and phenotype
 table are available as part of the ReCount online resource.
 
-We have alread load _HTSFilter_ so we can start by attaching the data in 
-`sultan`. Other information is available but we are just interested in the 
-matrix of counts and the groups for each sample:
+We first load _HTSFilter_ then we can start by attaching the data in `sultan`. 
+Other information is available but we are just interested in the matrix of
+counts and the groups for each sample:
 
 ```{r data}
+library("HTSFilter")
+
 data("sultan")
 
 counts <- exprs(sultan)
@@ -98,31 +94,44 @@ groups
 head(counts)
 ```
 
-The matrix of counts and factor specifying the group of each sample are going
-to be the main input for our analysis.
+The matrix of counts and the factor specifying the group of each sample are
+going to be the main input for our analysis. The groups factor should always be
+ordered so that the reference group is the lowest level.
 
 Exploration
 ===========
 
 Before starting our analysis we should begin by exploring our data. This allows
 us to spot anything that is obviously wrong and provides a baseline we can make
-comparisons to later. Let's have a look a the count density.
+comparisons to later.
+
+Raw Counts
+----------
+
+Let's have a look at the raw count density.
 
 ```{r count-density}
 countDensity(counts)
 ```
 
-All of the plotting function in lazappiRNA return _ggplot2_ objects. These can
-be easily modified, for example if we prefer the black and white theme and 
-would like a title:
+Most of the plotting functions in  lazappiRNA return _ggplot2_ objects, with
+the exception of those that produce Venn diagrams. These can be easily modified, 
+for example if we prefer the black and white theme and would like to add a
+title:
 
 ```{r count-density-bw}
-countDensity(counts) + theme_bw() + ggtitle("Count Densities")
+countDensity(counts) + ggplot2::theme_bw() + ggplot2::ggtitle("Count Densities")
 ```
 
 Here we can see that the distribution is both over a large range and heavily
-skewed towards low values. For this reason transformed version of counts are
-commonly used for plotting, such as: 
+skewed towards low values. This can be corrected by using a transformed verion
+of the counts.
+
+Transformed Counts
+------------------
+
+The simplest transformation is to take a log of the counts ($K$), after adding 
+one to avoid log of zero.
 
 $$
 \begin{aligned}
@@ -141,7 +150,7 @@ transformed <- transformCounts(counts,
 
 names(transformed)
 
-head(transformed[["log"]])
+head(transformed$log)
 ```
 
 The result of this function is a list of matrices where each is transformed
@@ -158,7 +167,10 @@ names(densities)
 densities$combined
 ```
 
-Similar function exist for producing boxplots.
+Boxplots
+--------
+
+Similar functions exist for producing boxplots.
 
 ```{r boxplots}
 boxplots <- listBoxplots(transformed)
@@ -171,6 +183,9 @@ show the expression quartiles and the presence of outlier genes. The density
 plots give more detail about the distribution, for example showing any
 bi-modality. It is also possible to see the effect of _DESeq2's_ regularised 
 log transformation as it removes the peak at lower expression levels.
+
+MA Plots
+--------
 
 Pairwise MA plots show the difference in expression for genes in two samples
 compared to the average expression of the two samples.
@@ -196,6 +211,9 @@ countMA(transformed$log)
 For this dataset the results look pretty good. The plot are centered around
 $y = 0$ and the samples from the same cell-types have reduced variance.
 
+Heatmaps
+--------
+
 To explore the similarites and dissimilarities between samples looking at a
 clustered heatmap of the between sample distances can be helpful. The
 `countHeatmap` function (and the related `listHeatmaps`) can be used to produce
@@ -217,6 +235,9 @@ similarities between samples, in particular identifying outliers and batch \
 effects. PCA reduces the dimensionality of a dataset to identify the directions
 with greatest variance. Plotting samples onto the reduced dimensions allows
 quick comparisons.
+
+PCA and MDS
+-----------
 
 ```{r PCA}
 PCA <- listPCA(transformed, top = 500, groups = groups)
@@ -299,11 +320,10 @@ replicates) the authors of _edgeR_ suggest an alternative approach where genes
 are removed if they have CPM less than one in at least the number of samples as
 the size of the smallest group. In addition _DESeq2_ has it's own independent
 filtering procedure. If `filter` is set to `TRUE` at the testing stage this will
-be turned off as _HTSFilter_ is assumed to be applied at the normalisation
-stage.
+be turned off as _HTSFilter_ is applied at the normalisation stage.
 
 Normalisation
-============
+=============
 
 Each package has its own normalisation procedures. Here we use the `listNorm`
 function to normalise our list of objects.
@@ -331,13 +351,16 @@ group2 <- "Ramos B cell"
 tested <- listTest(normalised, group1, group2, filter = TRUE)
 ```
 
-Before we examine the results we should first inspect the (unadjusted) pvalues.
+P-values
+--------
+
+Before we examine the results we should first inspect the (unadjusted) p-values.
 The distribution of p-values should consist of a uniform distribution according
 to the null hypothesis and a peak at low p-values for significant results that
 reject the null. We can easily look at the distribution of our results.
 
 ```{r p-values}
-pval.plots <- listPlotPvals(tested)
+pval.plots <- listPlotPvals(tested, alpha = 0.05)
 
 pval.plots$combined
 ```
@@ -350,6 +373,9 @@ that may suggest a problem with the assumed variance of the null distribution.
 For methods such as _DESeq2_ and _voom_ that report test statistics as well as
 p-values this can be corrected using the package _fdrtool_. From here on we
 only discuss p-values corrected for multiple testing.
+
+MA Plots
+--------
 
 We can now produce MA plots of our results.
 
@@ -375,6 +401,9 @@ edgeR::plotSmear(normalised$edgeR, de.tags = genes.de.names)
 rm(genes.de.names)
 ```
 
+Volcano Plots
+-------------
+
 An alternative to MA plots are volcano plots which show fold change against
 significance. The red shaded area shows absolute log fold changes less than two
 and the blue area significance levels less than 0.05. Grey points indicate
@@ -394,6 +423,9 @@ to look at that plot separately.
 volcanos$voom
 ```
 
+Combining Results
+=================
+
 Once we are satisfied that the results from each method look good we can begin
 to compare them. The Jaccard can be used to compare two lists and is calculated
 as the number of items in the intersect divided by the number in the union.
@@ -407,9 +439,10 @@ _voom_ have called many more genes as significantly differentially expressed.
 The indices suggest that the two versions of _DESeq_ are more similar to each
 other than the other two methods. Another way to view the lists is via a Venn
 diagram. Unfortunately _ggplot2_ is not capable of these so we make use of
-another excellent package _VennDiagram_, which provides a _grid_ graphics object.
+another excellent package _VennDiagram_, which provides a _grid_ graphics
+object.
 
-```{r venn}
+```{r venn, fig.height = 7}
 venn <- geneVenn(tested, alpha = 0.05)
 
 plot.new()
@@ -451,7 +484,7 @@ If you are just in interested in quickly getting results here is an example of
 the steps using the _Pasilla_ dataset. This section requires you to install the
 _pasilla_ and _Biobase_ packages.
 
-```{r pasilla}
+```{r pasilla, fig.height = 7}
 if (requireNamespace("pasilla", quietly = TRUE) &&
         requireNamespace("Biobase", quietly = TRUE)) {
     

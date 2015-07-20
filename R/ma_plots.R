@@ -13,6 +13,7 @@ listCountMA <- function(data.list) {
 
     plots <- list()
 
+    # Produce plots for each matrix in the list
     for (name in names(data.list)) {
 
         gg <- countMA(data.list[[name]])
@@ -42,17 +43,18 @@ listCountMA <- function(data.list) {
         plots[[name]] <- gg
     }
 
+    # Produce combined plots
     gg <- data.list %>%
-        lapply(getMAData) %>%
-        combineMatrices(lengthen = FALSE) %>%
-        magrittr::set_colnames(c("Gene", "Pair", "M", "A", "Set")) %>%
-        ggplot2::ggplot(aes(x = A, y = M)) +
-        ggplot2::geom_point() +
-        ggplot2::geom_hline(color = "blue3") +
-        ggplot2::stat_smooth(se = FALSE, method = "loess", color = "red3") +
-        ggplot2::facet_wrap(~ Pair + Set) +
-        ggplot2::ylab("Difference") +
-        ggplot2::xlab("Average Counts")
+          lapply(getMAData) %>%
+          combineMatrices(lengthen = FALSE) %>%
+          magrittr::set_colnames(c("Gene", "Pair", "M", "A", "Set")) %>%
+          ggplot2::ggplot(aes(x = A, y = M)) +
+          ggplot2::geom_point() +
+          ggplot2::geom_hline(color = "blue3") +
+          ggplot2::stat_smooth(se = FALSE, method = "loess", color = "red3") +
+          ggplot2::facet_wrap(~ Pair + Set) +
+          ggplot2::ylab("Difference") +
+          ggplot2::xlab("Average Counts")
 
     plots[["combined"]] <- gg
 
@@ -75,13 +77,13 @@ countMA <- function(data) {
     plot.data <- getMAData(data)
 
     gg <- plot.data %>%
-        ggplot2::ggplot(aes(x = A, y = M)) +
-        ggplot2::geom_point() +
-        ggplot2::geom_hline(color = "blue3") +
-        ggplot2::stat_smooth(se = FALSE, method = "loess", color = "red3") +
-        ggplot2::facet_wrap(~ Pair) +
-        ggplot2::ylab("Difference") +
-        ggplot2::xlab("Average Counts")
+          ggplot2::ggplot(aes(x = A, y = M)) +
+          ggplot2::geom_point() +
+          ggplot2::geom_hline(color = "blue3") +
+          ggplot2::stat_smooth(se = FALSE, method = "loess", color = "red3") +
+          ggplot2::facet_wrap(~ Pair) +
+          ggplot2::ylab("Difference") +
+          ggplot2::xlab("Average Counts")
 
     return(gg)
 }
@@ -89,26 +91,33 @@ countMA <- function(data) {
 
 getMAData <- function(data) {
 
+    # Get all combinations of samples
     MA.idx <- t(combn(1:ncol(data), 2))
 
+    # Set up empty data.frame
     ma.data <- data.frame(Gene = character(),
                           Pair = character(),
                           M    = numeric(),
                           A    = numeric())
 
+    # For each pair
     for (i in seq_along(MA.idx[, 1])) {
 
+        # Get indicies
         idx1 <- MA.idx[i, 1]
         idx2 <- MA.idx[i, 2]
 
+        # Get sample names
         name1 <- colnames(data)[idx1]
         name2 <- colnames(data)[idx2]
 
+        # Calculate M and D
         M <-  data[, idx1] - data[, idx2]
         A <- (data[, idx1] + data[, idx2]) / 2
 
         Pair <- rep(paste(name1, "vs", name2), nrow(data))
 
+        # Add data to data frame
         ma.data <- rbind(ma.data,
                          data.frame(Gene = rownames(data), Pair, M, A))
 
@@ -135,6 +144,7 @@ listResultsMA <- function(data.list, alpha = 0.05) {
     plots <- list()
     regular.data.list <- list()
 
+    # Produce individual plots
     for (name in names(data.list)) {
 
         data <- data.list[[name]]
@@ -147,14 +157,16 @@ listResultsMA <- function(data.list, alpha = 0.05) {
         plots[[name]] <- gg
     }
 
+    # Produce combined plot
     gg <- regular.data.list %>%
           combineMatrices(lengthen = FALSE) %>%
           dplyr::mutate(DE = Significance < alpha) %>%
           ggplot2::ggplot(ggplot2::aes(x = Abundance, y = FoldChange,
                                        colour = DE)) +
-          ggplot2::geom_rect(aes(xmin = -Inf, xmax = Inf,
-                                 ymin = -2,   ymax = 2),
-                             fill = "grey", alpha = 0.5, size = 0) +
+          ggplot2::annotate("rect",
+                            xmin = -Inf, xmax = Inf,
+                            ymin = -2, ymax = 2,
+                            alpha = 0.6, fill = "grey", size = 0) +
           ggplot2::geom_point() +
           ggplot2::facet_wrap(~ matrix) +
           ggplot2::geom_hline(yintercept = 0, colour = "blue") +
@@ -197,8 +209,11 @@ resultsMA <- function(results,
     if (method != "regular") {
         results <- results %>% regulariseResults(method = method)
     }
+
+    # Label significant genes
     plot.data <- results %>% dplyr::mutate(DE = Significance < alpha)
 
+    # Set labels
     xlabel <- "log Abundance"
     ylabel <- "log Fold Change"
 
@@ -226,12 +241,14 @@ resultsMA <- function(results,
         }
     )
 
+    # Produce plot
     gg <- ggplot2::ggplot(plot.data,
                           ggplot2::aes(x = Abundance, y = FoldChange,
                                        colour = DE)) +
-          ggplot2::geom_rect(aes(xmin = -Inf, xmax = Inf,
-                                 ymin = -2,   ymax = 2),
-                             fill = "grey", alpha = 0.5, size = 0) +
+          ggplot2::annotate("rect",
+                            xmin = -Inf, xmax = Inf,
+                            ymin = -2, ymax = 2,
+                            alpha = 0.6, fill = "grey", size = 0) +
           ggplot2::geom_point() +
           ggplot2::geom_hline(yintercept = 0, colour = "blue") +
           ggplot2::scale_colour_manual(values = c("black", "red")) +

@@ -122,7 +122,9 @@ listBoxplots <- function(data.list) {
           ggplot2::ggplot(aes(x = Sample, y = Counts, fill = Sample)) +
           ggplot2::geom_boxplot() +
           ggplot2::facet_wrap(~ Set) +
-          ggplot2::ylab("")
+          ggplot2::ylab("") +
+          ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
+                                                             hjust =  1))
 
     plots[["combined"]] <- gg
 
@@ -147,7 +149,9 @@ countBoxplots <- function(data) {
         magrittr::set_colnames(c("Gene", "Sample", "Counts")) %>%
         ggplot2::ggplot(aes(x = Sample, y = Counts, fill = Sample)) +
         ggplot2::geom_boxplot() +
-        ggplot2::xlab("")
+        ggplot2::xlab("") +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
+                                                           hjust =  1))
 
     return(gg)
 }

@@ -5,12 +5,14 @@
 \title{Volcano Plot}
 \usage{
 volcanoPlot(results, method = c("edgeR", "DESeq", "DESeq2", "voom",
-  "regular"))
+  "regular"), alpha = 0.05)
 }
 \arguments{
 \item{results}{Results to plot}
 
 \item{method}{Method used to produce the results}
+
+\item{alpha}{Significance level for shading}
 }
 \value{
 ggplot2 object containg volcano plot

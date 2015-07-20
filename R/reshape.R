@@ -69,26 +69,25 @@ counts2Objects <- function(data, groups, filter,
     objects <- list()
 
     for (method in methods) {
+
+        if (verbose) {message(paste0("Creating object for ", method, "..."))}
+
         switch(
             method,
 
             edgeR = {
-                if (verbose) {message("Creating object for edgeR...")}
                 objects$edgeR <- counts2edgeR(data, groups)
             },
 
             DESeq = {
-                if (verbose) message("Creating object for DESeq...")
                 objects$DESeq <- counts2DESeq(data, groups)
             },
 
             DESeq2 = {
-                if (verbose) message("Creating DESeq2 object...")
                 objects$DESeq2 <- counts2DESeq2(data, groups)
             },
 
             voom = {
-                if (verbose) {message("Creating voom object...")}
                 objects$voom <- counts2voom(data, groups, filter)
             },
 

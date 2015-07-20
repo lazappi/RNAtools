@@ -12,6 +12,7 @@ listHeatmaps <- function(data.list, groups = colnames(data.list[[1]])) {
 
     plots <- list()
 
+    # Construct heatmap for each matrix
     for (name in names(data.list)) {
 
         heatmap <- countHeatmap(data.list[[name]], groups = groups)
@@ -34,9 +35,11 @@ listHeatmaps <- function(data.list, groups = colnames(data.list[[1]])) {
 #' @export
 countHeatmap <- function(data, groups = colnames(data)) {
 
+    # Calculate distances
     dists <- as.matrix(dist(t(data)))
     colnames(dists) <- groups
 
+    # Produce heatmap objects
     heatmap <- makeHeatmap(dists, dist.mat = TRUE)
 
     return(heatmap)
@@ -81,6 +84,7 @@ makeHeatmap <- function(data, dist.mat = FALSE) {
 
     colours <- rev(colorRampPalette(RColorBrewer::brewer.pal(9, "Blues"))(255))
 
+    # Cluster samples
     if (dist.mat) {
         row.hc <- hclust(as.dist(data),    "ward.D")
         col.hc <- hclust(as.dist(t(data)), "ward.D")
@@ -89,16 +93,19 @@ makeHeatmap <- function(data, dist.mat = FALSE) {
         col.hc <- hclust(dist(t(data)), "ward.D")
     }
 
+    # Get data for dendrograms
     row.dendro <- ggdendro::dendro_data.dendrogram(as.dendrogram(row.hc),
                                                    type = "rectangle")
     col.dendro <- ggdendro::dendro_data.dendrogram(as.dendrogram(col.hc),
                                                    type = "rectangle")
 
+    # Produce dendrograms
     row.plot <- heatmapDendro(row.dendro, rows = TRUE) +
                 ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
     col.plot <- heatmapDendro(col.dendro, rows = FALSE) +
                 ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
 
+    # Order matrix rows and cols
     row.ord <- match(row.dendro$labels$label, rownames(data))
     if (dist.mat) {
         col.ord <- row.ord
@@ -106,6 +113,7 @@ makeHeatmap <- function(data, dist.mat = FALSE) {
         col.ord <- match(col.dendro$labels$label, colnames(data))
     }
 
+    # Reshape data for plotting
     plot.data <- data %>%
                  data.frame %>%
                  dplyr::select(col.ord) %>%
@@ -117,14 +125,16 @@ makeHeatmap <- function(data, dist.mat = FALSE) {
                  tidyr::gather(key = rowname) %>%
                  magrittr::set_colnames(c("row", "col", "value"))
 
+    # Produce central heatmap
     gg <- ggplot2::ggplot(plot.data, ggplot2::aes(row, col)) +
           ggplot2::geom_tile(ggplot2::aes(fill = value), colour = "white") +
           ggplot2::scale_fill_gradientn(colours = colours) +
           ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
 
+    # Return plot objects
     plot.list <- list(col = col.plot, row = row.plot, centre = gg)
 
-    invisible(plot.list)
+    return(plot.list)
 }
 
 #' Show heatmap
@@ -138,6 +148,7 @@ makeHeatmap <- function(data, dist.mat = FALSE) {
 #' @export
 showHeatmap <- function(plot.list, col.width = 0.2, row.width = 0.2) {
 
+    # Setup grid
     grid::grid.newpage()
 
     top.layout <- grid::grid.layout(
@@ -148,6 +159,7 @@ showHeatmap <- function(plot.list, col.width = 0.2, row.width = 0.2) {
 
     grid::pushViewport(grid::viewport(layout = top.layout))
 
+    # Draw dendrograms
     if (col.width > 0) {
         print(plot.list$col,
               vp = grid::viewport(layout.pos.col = 1, layout.pos.row = 1))
@@ -158,6 +170,7 @@ showHeatmap <- function(plot.list, col.width = 0.2, row.width = 0.2) {
               vp = grid::viewport(layout.pos.col = 2, layout.pos.row = 2))
     }
 
+    # Draw heatmap
     print(plot.list$centre +
           ggplot2::theme(axis.line        = ggplot2::element_blank(),
                          axis.text.x      = ggplot2::element_blank(),
@@ -173,8 +186,10 @@ showHeatmap <- function(plot.list, col.width = 0.2, row.width = 0.2) {
                          plot.background  = ggplot2::element_blank()),
           vp = grid::viewport(layout.pos.col = 1, layout.pos.row = 2))
 
+    # Draw legend
     legend <- heatmapLegend(plot.list$centre)
     grid::pushViewport(grid::viewport(layout.pos.col = 2, layout.pos.row = 1))
+
     grid::grid.draw(legend)
     grid::upViewport(0)
 }

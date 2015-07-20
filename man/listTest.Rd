@@ -4,7 +4,7 @@
 \alias{listTest}
 \title{List Test}
 \usage{
-listTest(data.list, group1, group2, filter, objects = NULL)
+listTest(data.list, group1, group2, filter, verbose = TRUE)
 }
 \arguments{
 \item{data.list}{List of normalised differential expression objects}
@@ -14,6 +14,8 @@ listTest(data.list, group1, group2, filter, objects = NULL)
 \item{group2}{Second group to test, the treatment}
 
 \item{filter}{Boolean, whether to apply HTSFilter}
+
+\item{verbose}{Boolean, whether to print messages showing progress}
 }
 \value{
 List of test result objects

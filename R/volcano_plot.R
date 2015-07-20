@@ -3,17 +3,19 @@
 #' Plot volcano plots from a list of differential expression results
 #'
 #' @param data.list List of results to plot
+#' @param alpha     Significance level for shading
 #'
 #' @return List of ggplot2 object containing volcano plots
 #'
 #' @importFrom magrittr "%>%"
 #'
 #' @export
-listVolcano <- function(data.list) {
+listVolcano <- function(data.list, alpha = 0.05) {
 
     plots <- list()
     regular.data.list <- list()
 
+    # Produce individual plots
     for (name in names(data.list)) {
 
         data <- data.list[[name]]
@@ -26,6 +28,7 @@ listVolcano <- function(data.list) {
         plots[[name]] <- gg
     }
 
+    # Produce combined plot
     gg <- regular.data.list %>%
           combineMatrices(lengthen = FALSE) %>%
           dplyr::mutate(logSig = -log(Significance)) %>%
@@ -37,7 +40,7 @@ listVolcano <- function(data.list) {
                                        colour = logSig, alpha = absFC)) +
           ggplot2::annotate("rect",
                             xmin = -Inf, xmax = Inf,
-                            ymin = -Inf, ymax = -log(0.05),
+                            ymin = -Inf, ymax = -log(alpha),
                             alpha = 0.2, fill = "blue", size = 0) +
           ggplot2::annotate("rect",
                             xmin = -2,   xmax = 2,
@@ -62,6 +65,7 @@ listVolcano <- function(data.list) {
 #'
 #' @param results Results to plot
 #' @param method  Method used to produce the results
+#' @param alpha   Significance level for shading
 #'
 #' @return ggplot2 object containg volcano plot
 #'
@@ -70,7 +74,8 @@ listVolcano <- function(data.list) {
 #' @export
 volcanoPlot <- function(results,
                         method = c("edgeR", "DESeq", "DESeq2",
-                                   "voom", "regular")) {
+                                   "voom", "regular"),
+                        alpha = 0.05) {
 
     # Check that a valid method has been given
     if (missing(method)) {
@@ -83,6 +88,7 @@ volcanoPlot <- function(results,
         results <- results %>% regulariseResults(method = method)
     }
 
+    # Reshape data from plotting
     plot.data <- results %>%
                  dplyr::mutate(logSig = -log(Significance)) %>%
                  dplyr::mutate(logSig = replace(logSig, is.na(logSig), -Inf)) %>%
@@ -95,7 +101,7 @@ volcanoPlot <- function(results,
                                        colour = logSig, alpha = absFC)) +
           ggplot2::annotate("rect",
                             xmin = -Inf, xmax = Inf,
-                            ymin = -Inf, ymax = -log(0.05),
+                            ymin = -Inf, ymax = -log(alpha),
                             alpha = 0.2, fill = "blue", size = 0) +
           ggplot2::annotate("rect",
                             xmin = -2,   xmax = 2,

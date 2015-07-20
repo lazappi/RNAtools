@@ -4,10 +4,12 @@
 \alias{listPlotPvals}
 \title{List p-value plots}
 \usage{
-listPlotPvals(data.list)
+listPlotPvals(data.list, alpha = 0.05)
 }
 \arguments{
 \item{data.list}{List of results to plot}
+
+\item{alpha}{Significance level for shading}
 }
 \value{
 List of ggplot2 objects containing p-value histograms

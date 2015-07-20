@@ -7,17 +7,20 @@
 #' @param group1    First group to test, the reference or control
 #' @param group2    Second group to test, the treatment
 #' @param filter    Boolean, whether to apply HTSFilter
+#' @param verbose   Boolean, whether to print messages showing progress
 #'
 #' @return List of test result objects
 #'
 #' @export
-listTest <- function(data.list, group1, group2, filter, objects = NULL) {
+listTest <- function(data.list, group1, group2, filter, verbose = TRUE) {
 
     tested <- list()
 
     for (name in names(data.list)) {
 
         data <- data.list[[name]]
+
+        if (verbose) {message(paste0("Testing ", name, "..."))}
 
         switch(
             name,
@@ -36,7 +39,10 @@ listTest <- function(data.list, group1, group2, filter, objects = NULL) {
 
             "voom" = {
                 test <- voomTest(data, group1, group2)
-            }
+            },
+
+            stop(paste("Method", name, "not recognised. Allowed methods are:",
+                       "edgeR/DESeq/DESeq2/voom"))
         )
 
         tested[[name]] <- test

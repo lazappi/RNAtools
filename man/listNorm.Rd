@@ -4,10 +4,12 @@
 \alias{listNorm}
 \title{List Normalise}
 \usage{
-listNorm(data.list)
+listNorm(data.list, verbose = TRUE)
 }
 \arguments{
 \item{data.list}{List of differential expression objects}
+
+\item{verbose}{Boolean, whether to print messages showing progress}
 }
 \value{
 List of normalised objects

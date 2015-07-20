@@ -16,6 +16,7 @@ listPCA <- function(data.list, top = nrow(data.list[[1]]),
 
     plots <- list()
 
+    # Produce individual plots
     for (name in names(data.list)) {
 
         gg <- samplePCA(data.list[[name]], top = top , group = groups) +
@@ -25,6 +26,7 @@ listPCA <- function(data.list, top = nrow(data.list[[1]]),
         plots[[name]] <- gg
     }
 
+    # Produce combined plots
     gg <- data.list %>%
           lapply(samplePCA, top = top, group = groups, plot = FALSE) %>%
           combineMatrices(lengthen = FALSE) %>%
@@ -34,13 +36,7 @@ listPCA <- function(data.list, top = nrow(data.list[[1]]),
           ggplot2::facet_wrap(~ matrix) +
           ggplot2::ggtitle(paste("PC1 vs PC2, top", top, "variable genes")) +
           ggplot2::xlab("PC1") +
-          ggplot2::ylab("PC2") +
-          ggplot2::theme(axis.title   = ggplot2::element_text(size = 20),
-                         axis.text    = ggplot2::element_text(size = 15),
-                         plot.title   = ggplot2::element_text(size = 30,
-                                                              face = "bold"),
-                         legend.text  = ggplot2::element_text(size = 15),
-                         legend.title = ggplot2::element_text(size = 15))
+          ggplot2::ylab("PC2")
 
     plots[["combined"]] <- gg
 
@@ -62,18 +58,22 @@ listPCA <- function(data.list, top = nrow(data.list[[1]]),
 #'
 #' @export
 samplePCA <- function(data, top = nrow(data), groups = colnames(data),
-                    plot = TRUE) {
+                      plot = TRUE) {
 
+    # Select high variance genes
     top.data <- data %>%
                 data.frame %>%
                 dplyr::mutate(var = genefilter::rowVars(data)) %>%
                 dplyr::top_n(top, var) %>%
                 dplyr::select(-var)
 
+    # Compute PCA
     PCA.data <- prcomp(t(top.data), scale = FALSE)
 
+    # Calculate variance
     percent.var <- round(100 * PCA.data$sdev ^ 2 / sum(PCA.data$sdev ^ 2), 1)
 
+    # Reshape data from plotting
     plot.data <- data.frame(PC1    = PCA.data$x[, 1],
                             PC2    = PCA.data$x[, 2],
                             Sample = colnames(data),
@@ -87,13 +87,7 @@ samplePCA <- function(data, top = nrow(data), groups = colnames(data),
           ggplot2::xlab(paste0("PC1, VarExp: ",
                                round(percent.var[1], 4), "%")) +
           ggplot2::ylab(paste0("PC2, VarExp: ",
-                               round(percent.var[2], 4), "%")) +
-          ggplot2::theme(axis.title   = ggplot2::element_text(size = 20),
-                         axis.text    = ggplot2::element_text(size = 15),
-                         plot.title   = ggplot2::element_text(size = 30,
-                                                              face = "bold"),
-                         legend.text  = ggplot2::element_text(size = 15),
-                         legend.title = ggplot2::element_text(size = 15))
+                               round(percent.var[2], 4), "%"))
     if (plot) {
         return(gg)
     } else {
@@ -126,6 +120,7 @@ sampleMDS <- function(data, top = nrow(data), groups = colnames(data),
         selection <- match.arg(selection)
     }
 
+    # Create matrix for storing distances
     dists <- matrix(0, nrow = ncol(data), ncol = ncol(data),
                     dimnames = list(colnames(data), colnames(data)))
 
@@ -133,9 +128,11 @@ sampleMDS <- function(data, top = nrow(data), groups = colnames(data),
 
         top.idx <- ncol(data) - top + 1
 
+        # For each pair of samples
         for (i in 2:ncol(data)) {
             for (j in 1:(i - 1)) {
 
+                # Calculate distance high variance genes for this pair
                 sqr.dist <- sort((data[, i] - data[, j]) ^ 2, decreasing = TRUE)
                 sqr.dist <- sqr.dist[1:top]
 
@@ -146,6 +143,8 @@ sampleMDS <- function(data, top = nrow(data), groups = colnames(data),
         axis.label <- "Leading logFC dim"
 
     } else {
+
+        # Find high variance genes
         top.data <- data %>%
                     data.frame %>%
                     dplyr::mutate(sqr.dev =
@@ -153,6 +152,7 @@ sampleMDS <- function(data, top = nrow(data), groups = colnames(data),
                     dplyr::top_n(top, sqr.dev) %>%
                     dplyr::select(-sqr.dev)
 
+        # Calculate ditances
         for (i in 2:ncol(data)) {
             dists[i, 1:(i - 1)] <- sqrt(colMeans(
                                             (top.data[, i] -
@@ -163,8 +163,10 @@ sampleMDS <- function(data, top = nrow(data), groups = colnames(data),
         axis.label <- "Principal Component"
     }
 
+    # Calculate MDS
     MDS.data <- cmdscale(as.dist(dists), k = 2)
 
+    # Reshape data for plotting
     plot.data <- data.frame(X      = MDS.data[, 1],
                             Y      = MDS.data[, 2],
                             Sample = colnames(data),
@@ -177,13 +179,8 @@ sampleMDS <- function(data, top = nrow(data), groups = colnames(data),
           ggplot2::ggtitle(paste("MDS Plot, top", top, selection,
                                  "variable genes")) +
           ggplot2::xlab(paste(axis.label, 1)) +
-          ggplot2::ylab(paste(axis.label, 2)) +
-          ggplot2::theme(axis.title   = ggplot2::element_text(size = 20),
-                         axis.text    = ggplot2::element_text(size = 15),
-                         plot.title   = ggplot2::element_text(size = 30,
-                                                              face = "bold"),
-                         legend.text  = ggplot2::element_text(size = 15),
-                         legend.title = ggplot2::element_text(size = 15))
+          ggplot2::ylab(paste(axis.label, 2))
+
     if (plot) {
         return(gg)
     } else {
@@ -211,6 +208,7 @@ listMDS <- function(data.list, top = nrow(data.list[[1]]),
 
     plots <- list()
 
+    # Produce indiviual plots
     for (name in names(data.list)) {
 
         gg <- sampleMDS(data.list[[name]], top = top , group = groups,
@@ -221,12 +219,14 @@ listMDS <- function(data.list, top = nrow(data.list[[1]]),
         plots[[name]] <- gg
     }
 
+    # Set appropriate lables
     if (selection == "pairwise") {
         axis.label <- "Leading logFC dim"
     } else {
         axis.label <- "Principal Component"
     }
 
+    # Produce combined plot
     gg <- data.list %>%
         lapply(sampleMDS, top = top, group = groups, plot = FALSE,
                selection = selection) %>%
@@ -238,13 +238,13 @@ listMDS <- function(data.list, top = nrow(data.list[[1]]),
         ggplot2::ggtitle(paste("MDS Plots, top", top, selection,
                                "variable genes")) +
         ggplot2::xlab(paste(axis.label, 1)) +
-        ggplot2::ylab(paste(axis.label, 2)) +
-        ggplot2::theme(axis.title   = ggplot2::element_text(size = 20),
-                       axis.text    = ggplot2::element_text(size = 15),
-                       plot.title   = ggplot2::element_text(size = 30,
-                                                            face = "bold"),
-                       legend.text  = ggplot2::element_text(size = 15),
-                       legend.title = ggplot2::element_text(size = 15))
+        ggplot2::ylab(paste(axis.label, 2)) #+
+        #ggplot2::theme(axis.title   = ggplot2::element_text(size = 20),
+        #               axis.text    = ggplot2::element_text(size = 15),
+        #               plot.title   = ggplot2::element_text(size = 30,
+        #                                                    face = "bold"),
+        #               legend.text  = ggplot2::element_text(size = 15),
+        #               legend.title = ggplot2::element_text(size = 15))
 
     plots[["combined"]] <- gg
 

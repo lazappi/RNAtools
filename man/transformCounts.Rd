@@ -10,7 +10,7 @@ transformCounts(data, methods, verbose = TRUE)
 \item{data}{Matrix of raw counts}
 
 \item{methods}{Vector of transformation methods to apply, choices are "log",
-"vst", "rlog" and "cpm".}
+"vst", "rlog", "cpm" and "logCPM".}
 
 \item{verbose}{Boolean, whether to print messages showing progress}
 }

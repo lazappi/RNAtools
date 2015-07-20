@@ -4,12 +4,15 @@
 \alias{plotPvals}
 \title{Plot p-values}
 \usage{
-plotPvals(results, method = c("edgeR", "DESeq", "DESeq2", "voom", "regular"))
+plotPvals(results, method = c("edgeR", "DESeq", "DESeq2", "voom", "regular"),
+  alpha = 0.05)
 }
 \arguments{
 \item{results}{Results to plot}
 
 \item{method}{Method used to produce the results}
+
+\item{alpha}{Significance level for shading}
 }
 \value{
 ggplot2 object containg p-value histogram
