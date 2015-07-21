@@ -14,4 +14,4 @@ vignettes/*.pdf
 vignettes/*cache
 vignettes/*files
 .Rproj.user
-inst/doc
+#inst/doc

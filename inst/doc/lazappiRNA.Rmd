@@ -1,0 +1,523 @@
+---
+title: "lazappiRNA"
+author: "Luke Zappia"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{lazappiRNA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r global_options, include = FALSE}
+# Default RMarkdown options
+# Changing these will change them for all chunks unless otherwise set
+knitr::opts_chunk$set(
+                        autodep        = TRUE,
+                        cache          = TRUE,
+                        cache.comments = TRUE,
+                        collapse       = TRUE,
+                        comment        = "##",
+                        #dev            = "png",
+                        echo           = TRUE,
+                        error          = FALSE,
+                        fig.width      = 7,
+                        fig.height     = 5,
+                        fig.align      = "center",
+                        highlight      = TRUE,
+                        include        = TRUE,
+                        message        = FALSE,
+                        prompt         = FALSE,
+                        results        = "markup",
+                        size           = "normalsize",
+                        strip.white    = TRUE,
+                        tidy           = FALSE,
+                        tidy.opts      = NULL,
+                        warning        = FALSE
+               )
+```
+
+Welcome!
+========
+
+Welcome to lazappiRNA! Many studies across the life science now make use of
+RNA-seq to investigate gene products. These experiments can provide high-quality
+measurements of gene expression across a wide dynamic range, and in contrast to
+microarracy experiments do not require probes to be designed for specific
+regions.
+
+Perhaps the most common analysis pipeline for RNA-seq data is to perform
+quality control, align reads to a reference genome, summarise reads against a
+known annotation and perform differential expression testing. The aim of this
+process is to identify genes or transcripts that have significantly different 
+activity levels under some treatment condition (disease, drug, knockout, 
+environment...) compared to a control. Further analysis attempts to investigate 
+the biological implications of these changes in regulation.
+
+Multiple methods exist for each of these steps. This package takes a matrix of
+summarised counts for a group of samples and provides a unified interface for
+differential expression testing (using _edgeR_, _DESeq_, _DESeq2_ and
+_limma-voom_) and functional analysis. The aim is allow simultaneous analysis 
+using multiple packages including robust quality control, easily comparable 
+visulisations and combination of results.
+
+Before we get started let's load the _lazappiRNA_ package:
+
+```{r libraries}
+library("lazappiRNA")
+```
+
+Data
+====
+
+For this vignette we are going to make use of data from Sultan et al. available
+from the _HTSFilter_ package. This dataset contains two biological replicates
+from a human embryonic kidney and B cell line. The raw read count and phenotype
+table are available as part of the ReCount online resource.
+
+We first load _HTSFilter_ then we can start by attaching the data in `sultan`. 
+Other information is available but we are just interested in the matrix of
+counts and the groups for each sample:
+
+```{r data}
+library("HTSFilter")
+
+data("sultan")
+
+counts <- exprs(sultan)
+groups <- pData(sultan)$cell.line
+
+rm(sultan)
+
+groups
+
+head(counts)
+```
+
+The matrix of counts and the factor specifying the group of each sample are
+going to be the main input for our analysis. The groups factor should always be
+ordered so that the reference group is the lowest level.
+
+Exploration
+===========
+
+Before starting our analysis we should begin by exploring our data. This allows
+us to spot anything that is obviously wrong and provides a baseline we can make
+comparisons to later.
+
+Raw Counts
+----------
+
+Let's have a look at the raw count density.
+
+```{r count-density}
+countDensity(counts)
+```
+
+Most of the plotting functions in  lazappiRNA return _ggplot2_ objects, with
+the exception of those that produce Venn diagrams. These can be easily modified, 
+for example if we prefer the black and white theme and would like to add a
+title:
+
+```{r count-density-bw}
+countDensity(counts) + ggplot2::theme_bw() + ggplot2::ggtitle("Count Densities")
+```
+
+Here we can see that the distribution is both over a large range and heavily
+skewed towards low values. This can be corrected by using a transformed verion
+of the counts.
+
+Transformed Counts
+------------------
+
+The simplest transformation is to take a log of the counts ($K$), after adding 
+one to avoid log of zero.
+
+$$
+\begin{aligned}
+    y = log_2(K + 1)
+\end{aligned}
+$$
+
+More sophisted transformations are provided by the differential expression
+packages such as the Variance Stabilising Transformation (_DESeq_),
+regularised-log (_DESeq2_) and log Counts Per Million (_edgeR_). lazappiRNA
+is capable of performing each of these.
+
+```{r transform}
+transformed <- transformCounts(counts,
+                               methods = c("log", "vst", "rlog", "logCPM"))
+
+names(transformed)
+
+head(transformed$log)
+```
+
+The result of this function is a list of matrices where each is transformed
+using one of the specifed methods. We can now use the `listDensity` function
+to plot each of these. Again the result is a list but now each item is a 
+_ggplot2_ object containing a density plot. An additional item has been added
+which holds the combined plot.
+
+```{r densities}
+densities <- listDensity(transformed)
+
+names(densities)
+
+densities$combined
+```
+
+Boxplots
+--------
+
+Similar functions exist for producing boxplots.
+
+```{r boxplots}
+boxplots <- listBoxplots(transformed)
+
+boxplots$combined
+```
+
+Both sets of plots can be helpful for exploring a dataset. The boxplots clearly
+show the expression quartiles and the presence of outlier genes. The density
+plots give more detail about the distribution, for example showing any
+bi-modality. It is also possible to see the effect of _DESeq2's_ regularised 
+log transformation as it removes the peak at lower expression levels.
+
+MA Plots
+--------
+
+Pairwise MA plots show the difference in expression for genes in two samples
+compared to the average expression of the two samples.
+
+```{r ma-plots}
+ma.plots <- listCountMA(transformed)
+
+ma.plots$combined
+```
+
+Here we can see the reproducability between samples and whether normalisation
+is needed. Genes that are similar in the two samples appear around the $y = 0$
+line (blue) and a lowess fit (red) shows trends in bias related to mean
+expression.
+
+With more samples the numbers of these plot grows quickly and it may be more
+useful to select a single transformation or some samples of interest.
+
+```{r single-ma}
+countMA(transformed$log)
+```
+
+For this dataset the results look pretty good. The plot are centered around
+$y = 0$ and the samples from the same cell-types have reduced variance.
+
+Heatmaps
+--------
+
+To explore the similarites and dissimilarities between samples looking at a
+clustered heatmap of the between sample distances can be helpful. The
+`countHeatmap` function (and the related `listHeatmaps`) can be used to produce
+these plots. By providing the vector of groups these can be included as labels
+on the y-axis. As dendrograms indicating the clustering are included the result
+is a list of _ggplot2_ objects instead of a single plot. The `showHeatmap`
+function can assemble these into a single image.
+
+```{r heatmaps, fig.height = 7}
+heatmap <- countHeatmap(transformed$log, groups = groups)
+
+names(heatmap)
+
+showHeatmap(heatmap)
+```
+
+Principal component analysis (PCA) can also be useful for visualising the
+similarities between samples, in particular identifying outliers and batch \
+effects. PCA reduces the dimensionality of a dataset to identify the directions
+with greatest variance. Plotting samples onto the reduced dimensions allows
+quick comparisons.
+
+PCA and MDS
+-----------
+
+```{r PCA}
+PCA <- listPCA(transformed, top = 500, groups = groups)
+
+PCA$combined
+```
+
+Since PCA can be problematic with very high-dimensional data we select the
+top 500 most variable genes, and provide groups to colour the labels. As we are
+looking for differentially expressed genes we hope to see a clear separation
+between the two groups, as is the case along PC1.
+
+Multidimenionsal scaling (MDS) provides an alternative to PCA that aims to
+visually represent the distances amongst a set of samples. Genes can be selected
+based on "common" deviations across all samples (similar to what was done with
+PCA) or "pairwise" between each pair of samples.
+
+```{r MDS}
+MDS <- listMDS(transformed, top = 500, group = groups, selection = "pairwise")
+
+MDS$combined
+```
+
+In this simple example the PCA and MDS plots are highly similar but with more
+complex datasets it may be worthwhile examining both.
+
+Objects
+=======
+
+Each differential expression package makes use of its own objects. A function
+is provided to easily convert a matrix of counts into the appropriate objects
+for multiple packages, returned as a list.
+
+```{r objects}
+objects <- counts2Objects(counts, groups, filter = TRUE,
+                          methods = c("edgeR", "DESeq", "DESeq2", "voom"))
+
+names(objects)
+
+for(object in objects) {
+    print(class(object))
+}
+```
+
+**NOTE:** It is important that the names of this list are not changed as they
+will be used by following functions to identify which method to apply.
+
+A Note on Filtering
+===================
+
+Many genes in any RNA-seq dataset are uninformative simply because they have
+zero or very few reads. These genes don't affect the results immediately as they 
+will the differential expression tests, however they can affect how other genes
+are treated. More genes means more tests which affects the procedures used to 
+correct for multiple testing. By removing low-expression genes we reduce the
+number of tests and possibly increase the number of genes found to be
+significantly differentially expressed.
+
+The _HTSFilter_ package provides a method for independently filtering genes in 
+datasets with biological replicates. There several stages of the process where
+filtering could theoretically be applied. By setting the `filter` option in
+`counts2objects` and related functions we conduct filtering when suggested by
+the _HTSFilter_ author. Unfortunately the appropriate stage is different for
+eachmethod. For example for _voom_ no methods for normalised datasets exist so
+the most appropriate stage is when constructing objects from the raw counts.
+
+```{r filtering}
+nrow(counts)
+
+nrow(objects$voom$counts)
+```
+
+ _HTSFilter_ can produce a plot that shows how the filtering threshold is chosen. 
+Basically it attempts to find that a value that removes the same number of
+genes from each group of samples. To avoid cluttering analysis this plot is
+suppresed by a message showing the chosen threshold is printed to the console.
+
+If you prefer not to use _HTSFilter_ (for example if you don't have biological
+replicates) the authors of _edgeR_ suggest an alternative approach where genes
+are removed if they have CPM less than one in at least the number of samples as
+the size of the smallest group. In addition _DESeq2_ has it's own independent
+filtering procedure. If `filter` is set to `TRUE` at the testing stage this will
+be turned off as _HTSFilter_ is applied at the normalisation stage.
+
+Normalisation
+=============
+
+Each package has its own normalisation procedures. Here we use the `listNorm`
+function to normalise our list of objects.
+
+```{r normalise}
+normalised <- listNorm(objects)
+```
+
+Please read the documentation for the packages you plan to use to properly
+undstand what is been done in this process.
+
+Testing
+=======
+
+Once the data has been normalised we can test for differential expression. We 
+first need to assign the groups we would like to test as `group1`, the
+reference or control, and `group1` the treament. The control group should always 
+be whichever group was defined as the lowest level of the `groups` factor. Again
+a list function allows use to perform all methods simultaneously.
+
+```{r test}
+group1 <- "HEK293T"
+group2 <- "Ramos B cell"
+
+tested <- listTest(normalised, group1, group2, filter = TRUE)
+```
+
+P-values
+--------
+
+Before we examine the results we should first inspect the (unadjusted) p-values.
+The distribution of p-values should consist of a uniform distribution according
+to the null hypothesis and a peak at low p-values for significant results that
+reject the null. We can easily look at the distribution of our results.
+
+```{r p-values}
+pval.plots <- listPlotPvals(tested, alpha = 0.05)
+
+pval.plots$combined
+```
+
+Our results seem have been computed correctly. We see a consistent rectangle
+across most p-values with significant peaks at low values suggesting that there
+are many differently expressed genes. Here the shaded red area shows p-values
+less than 0.05. If you were to see a different pattern, such as hill or u-shaped
+that may suggest a problem with the assumed variance of the null distribution.
+For methods such as _DESeq2_ and _voom_ that report test statistics as well as
+p-values this can be corrected using the package _fdrtool_. From here on we
+only discuss p-values corrected for multiple testing.
+
+MA Plots
+--------
+
+We can now produce MA plots of our results.
+
+```{r results-MA}
+results.ma <- listResultsMA(tested, alpha = 0.05)
+
+results.ma$combined
+```
+
+Here we plot log average expression level against the log fold change estimated
+by each method. The genes with adjust p-values greater than alpha are coloured
+in red, the blue line indicates log fold change equal to zero and the shaded
+area log fold change with magnitude less than two. 
+
+The individual packages have their own functions for creating these plots. In
+particular _edgeR's_ `plotSmear` may be worthwhile examining as it adds some
+additional features.
+
+```{r plotSmear}
+genes.de.names <- rownames(tested$edgeR)[tested$edgeR$FDR < 0.05]
+edgeR::plotSmear(normalised$edgeR, de.tags = genes.de.names)
+
+rm(genes.de.names)
+```
+
+Volcano Plots
+-------------
+
+An alternative to MA plots are volcano plots which show fold change against
+significance. The red shaded area shows absolute log fold changes less than two
+and the blue area significance levels less than 0.05. Grey points indicate
+genes that returned significance of zero (top), or were missing p-values
+(bottom). 
+
+```{r volcano}
+volcanos <- listVolcano(tested)
+
+volcanos$combined
+```
+
+Voom typically returns much lower significance levels so it can be preferable
+to look at that plot separately.
+
+```{r voom-volcano}
+volcanos$voom
+```
+
+Combining Results
+=================
+
+Once we are satisfied that the results from each method look good we can begin
+to compare them. The Jaccard can be used to compare two lists and is calculated
+as the number of items in the intersect divided by the number in the union.
+
+```{r jaccard}
+jaccardTable(tested, alpha = 0.05)
+```
+
+From the number of genes identified by the methods we can see that _edgeR_ and
+_voom_ have called many more genes as significantly differentially expressed.
+The indices suggest that the two versions of _DESeq_ are more similar to each
+other than the other two methods. Another way to view the lists is via a Venn
+diagram. Unfortunately _ggplot2_ is not capable of these so we make use of
+another excellent package _VennDiagram_, which provides a _grid_ graphics
+object.
+
+```{r venn, fig.height = 7}
+venn <- geneVenn(tested, alpha = 0.05)
+
+plot.new()
+grid::grid.draw(venn)
+text(0.5, 1, "Comparison of Lists", vfont = c("serif", "bold"), cex = 2)
+text(0.5, 0, "Number of Differentially Expressed Genes",
+     vfont = c("serif", "plain"), cex = 1.5)
+```
+
+We can see that the majority of genes were identifed by all methods and that
+those identified by _DESeq_ and _DESeq2_ are almost a subset of those from the
+other methods.
+
+To extract the lists of genes from each segment of the Venn diagram we can use
+the `vennGenes` function. The result is a list of vectors containing gene names.
+The name of each item in the list describes the segment and the vector contains
+the genes that are in that segment but not anywhere else. The lengths should be
+the same as the numbers in the Venn diagram.
+
+```{r venn-gene}
+venn.genes <- vennGenes(tested, alpha = 0.05)
+
+sapply(venn.genes, length)
+```
+
+The segment lists can be combined to get whichever regions are of interest. For
+example if we wanted the total list of genes.
+
+```{r all-genes}
+all.genes <- Reduce(union, venn.genes)
+
+length(all.genes)
+```
+
+Quick Analysis
+==============
+
+If you are just in interested in quickly getting results here is an example of
+the steps using the _Pasilla_ dataset. This section requires you to install the
+_pasilla_ and _Biobase_ packages.
+
+```{r pasilla, fig.height = 7}
+if (requireNamespace("pasilla", quietly = TRUE) &&
+        requireNamespace("Biobase", quietly = TRUE)) {
+    
+    data("pasillaGenes", package = "pasilla")
+    
+    group1 <- "untreated"
+    group2 <- "treated"
+    
+    counts <- counts(pasillaGenes)
+    groups <- factor(pData(pasillaGenes)[, c("condition")])
+    groups <- relevel(groups, ref = "untreated")
+    
+    objects <- counts2Objects(counts, groups = groups, 
+                              methods = c("edgeR", "DESeq", "DESeq2", "voom"),
+                              filter = TRUE)
+    normalised <- listNorm(objects)
+    tested <- listTest(normalised, group1 = group1, group2 = group2,
+                       filter = TRUE)
+    
+    venn <- geneVenn(tested, alpha = 0.05)
+
+    plot.new()
+    grid::grid.draw(venn)
+    text(0.5, 1, "Comparison of Lists", vfont = c("serif", "bold"), cex = 2)
+    text(0.5, 0, "Number of Differentially Expressed Genes",
+         vfont = c("serif", "plain"), cex = 1.5)
+}
+```
+
+Session Info
+============
+
+```{r sessionInfo}
+sessionInfo()
+```
+
