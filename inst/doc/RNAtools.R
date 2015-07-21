@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
                )
 
 ## ----libraries-----------------------------------------------------------
-library("lazappiRNA")
+library("RNAtools")
 
 ## ----data----------------------------------------------------------------
 library("HTSFilter")

@@ -1,10 +1,10 @@
 ---
-title: "lazappiRNA"
+title: "RNAtools"
 author: "Luke Zappia"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{lazappiRNA}
+  %\VignetteIndexEntry{RNAtools}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -40,7 +40,7 @@ knitr::opts_chunk$set(
 Welcome!
 ========
 
-Welcome to lazappiRNA! Many studies across the life science now make use of
+Welcome to RNAtools! Many studies across the life science now make use of
 RNA-seq to investigate gene products. These experiments can provide high-quality
 measurements of gene expression across a wide dynamic range, and in contrast to
 microarracy experiments do not require probes to be designed for specific
@@ -61,10 +61,10 @@ _limma-voom_) and functional analysis. The aim is allow simultaneous analysis
 using multiple packages including robust quality control, easily comparable 
 visulisations and combination of results.
 
-Before we get started let's load the _lazappiRNA_ package:
+Before we get started let's load the _RNAtools_ package:
 
 ```{r libraries}
-library("lazappiRNA")
+library("RNAtools")
 ```
 
 Data
@@ -114,7 +114,7 @@ Let's have a look at the raw count density.
 countDensity(counts)
 ```
 
-Most of the plotting functions in  lazappiRNA return _ggplot2_ objects, with
+Most of the plotting functions in RNAtools return _ggplot2_ objects, with
 the exception of those that produce Venn diagrams. These can be easily modified, 
 for example if we prefer the black and white theme and would like to add a
 title:
@@ -141,7 +141,7 @@ $$
 
 More sophisted transformations are provided by the differential expression
 packages such as the Variance Stabilising Transformation (_DESeq_),
-regularised-log (_DESeq2_) and log Counts Per Million (_edgeR_). lazappiRNA
+regularised-log (_DESeq2_) and log Counts Per Million (_edgeR_). RNAtools
 is capable of performing each of these.
 
 ```{r transform}

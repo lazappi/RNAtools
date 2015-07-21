@@ -43,7 +43,8 @@ listDensity <- function(data.list) {
     gg <- data.list %>%
           combineMatrices %>%
           magrittr::set_colnames(c("Gene", "Sample", "Counts", "Set")) %>%
-          ggplot2::ggplot(aes(x = Counts, fill = Sample, colour = Sample)) +
+          ggplot2::ggplot(ggplot2::aes(x = Counts, fill = Sample,
+                                       colour = Sample)) +
           ggplot2::geom_density(alpha = 0.3) +
           ggplot2::facet_wrap(~ Set)
 
@@ -120,7 +121,8 @@ listBoxplots <- function(data.list) {
     gg <- data.list %>%
           combineMatrices %>%
           magrittr::set_colnames(c("Gene", "Sample", "Counts", "Set")) %>%
-          ggplot2::ggplot(aes(x = Sample, y = Counts, fill = Sample)) +
+          ggplot2::ggplot(ggplot2::aes(x = Sample, y = Counts,
+                                       fill = Sample)) +
           ggplot2::geom_boxplot() +
           ggplot2::facet_wrap(~ Set) +
           ggplot2::ylab("") +
@@ -148,7 +150,7 @@ countBoxplots <- function(data) {
     gg <- data %>%
         lengthenMatrix %>%
         magrittr::set_colnames(c("Gene", "Sample", "Counts")) %>%
-        ggplot2::ggplot(aes(x = Sample, y = Counts, fill = Sample)) +
+        ggplot2::ggplot(ggplot2::aes(x = Sample, y = Counts, fill = Sample)) +
         ggplot2::geom_boxplot() +
         ggplot2::xlab("") +
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,

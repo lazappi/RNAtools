@@ -48,7 +48,7 @@ listCountMA <- function(data.list) {
           lapply(getMAData) %>%
           combineMatrices(lengthen = FALSE) %>%
           magrittr::set_colnames(c("Gene", "Pair", "M", "A", "Set")) %>%
-          ggplot2::ggplot(aes(x = A, y = M)) +
+          ggplot2::ggplot(ggplot2::aes(x = A, y = M)) +
           ggplot2::geom_point() +
           ggplot2::geom_hline(color = "blue3") +
           ggplot2::stat_smooth(se = FALSE, method = "loess", color = "red3") +
@@ -77,7 +77,7 @@ countMA <- function(data) {
     plot.data <- getMAData(data)
 
     gg <- plot.data %>%
-          ggplot2::ggplot(aes(x = A, y = M)) +
+          ggplot2::ggplot(ggplot2::aes(x = A, y = M)) +
           ggplot2::geom_point() +
           ggplot2::geom_hline(color = "blue3") +
           ggplot2::stat_smooth(se = FALSE, method = "loess", color = "red3") +
