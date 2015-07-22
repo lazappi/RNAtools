@@ -118,7 +118,7 @@ vstTransform <- function(data) {
 #' @export
 rlogTransform <- function(data) {
 
-    transformed <- DESeq2::rlogTransformation(counts)
+    transformed <- DESeq2::rlogTransformation(data)
     rownames(transformed) <- rownames(data)
 
     return(transformed)
