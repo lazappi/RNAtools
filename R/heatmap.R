@@ -126,7 +126,7 @@ makeHeatmap <- function(data, dist.mat = FALSE) {
                  magrittr::set_colnames(c("row", "col", "value"))
 
     # Produce central heatmap
-    gg <- ggplot2::ggplot(plot.data, ggplot2::aes(row, col)) +
+    gg <- ggplot2::ggplot(plot.data, ggplot2::aes(x = col, y = row)) +
           ggplot2::geom_tile(ggplot2::aes(fill = value), colour = "white") +
           ggplot2::scale_fill_gradientn(colours = colours) +
           ggplot2::theme(plot.margin = grid::unit(c(0, 0, 0, 0), "lines"))
