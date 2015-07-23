@@ -125,7 +125,7 @@ deseq2Test <- function(count.data, group1, group2, filter) {
 
     if (filter) {
         n.start <- nrow(count.data)
-        filtered <- HTSFilter(count.data, plot = FALSE)
+        filtered <- HTSFilter::HTSFilter(count.data, plot = FALSE)
         count.data <- filtered$filteredData
 
         message(paste("HTSFilter threshold:", filtered$s,
