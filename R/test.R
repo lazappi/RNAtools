@@ -132,11 +132,11 @@ deseq2Test <- function(count.data, group1, group2, filter) {
                       "Genes Filtered:", n.start - nrow(count.data)))
 
         results <- DESeq2::results(count.data,
-                                   contrast = c("group", group1, group2),
+                                   contrast = c("group", group2, group1),
                                    independentFiltering = FALSE)
     } else {
         results <- DESeq2::results(count.data,
-                                   contrast = c("group", group1, group2))
+                                   contrast = c("group", group2, group1))
     }
 
     results <- results[order(results$padj), ]
