@@ -184,7 +184,16 @@ counts2DESeq2 <- function(data, groups) {
     return(count.data)
 }
 
-
+#' Regularise Results
+#'
+#' Convert results from DE testing to a regular format
+#'
+#' @param results Differential Expression results object
+#' @param Method  Method used to produce the results
+#'
+#' @return data.frame containing regularised results
+#'
+#' @export
 regulariseResults <- function(results,
                               method = c("edgeR", "DESeq", "DESeq2", "voom") ) {
 
@@ -242,4 +251,30 @@ regulariseResults <- function(results,
     )
 
     return(regular)
+}
+
+#' List Regularise
+#'
+#' Convert list of differential expression results to a regular format
+#'
+#' @param data.list List of differential expression results
+#'
+#' @return List of regularised results
+#'
+#' @export
+listRegularise <- function(data.list) {
+
+    regular.data.list <- list()
+
+    # Produce individual plots
+    for (name in names(data.list)) {
+
+        data <- data.list[[name]]
+
+        regular.data <- regulariseResults(data, name)
+
+        regular.data.list[[name]] <- regular.data
+    }
+
+    return(regular.data.list)
 }
