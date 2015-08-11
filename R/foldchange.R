@@ -80,3 +80,53 @@ plotFoldChange <- function(data.list, gene.set) {
     return(gg)
 
 }
+
+#' Gene Set Table
+#'
+#' Produce a table showing how many genes in a list of sets are differentially
+#' expressed, up-regulated and down-regulated.
+#'
+#' @param data.list List of differential expression results
+#' @param de.set    Set of differentially expressed genes
+#' @param gene.sets Named list of gene sets to include in table
+#'
+#' @return data.frame containing the summary table
+#'
+#' @importFrom magrittr "%>%"
+#'
+#' @export
+setTable <- function(data.list, de.set, gene.sets) {
+
+    gene.summary <- geneSummary(data.list)
+
+    de.set.up <- gene.summary %>%
+                 dplyr::filter(Gene %in% de.set) %>%
+                 dplyr::filter(meanFC > 0) %>%
+                 as.data.frame() %>%
+                 magrittr::extract(, "Gene")
+
+    de.set.dn <- gene.summary %>%
+                 dplyr::filter(Gene %in% de.set) %>%
+                 dplyr::filter(meanFC <= 0) %>%
+                 as.data.frame() %>%
+                 magrittr::extract(, "Gene")
+
+    table.data <- lapply(gene.sets,
+                         function(x) {
+                             total <- length(x)
+                             de    <- length(intersect(x, de.set))
+                             de.up <- length(intersect(x, de.set.up))
+                             de.dn <- length(intersect(x, de.set.dn))
+                             return(c(total, de, de.up, de.dn))
+                         }
+                    )
+
+    table.data <- table.data %>% unlist %>% matrix(ncol = 4, byrow = TRUE)
+
+    table <- data.frame(Set      = names(gene.sets),
+                        NumGenes = table.data[, 1],
+                        DE       = table.data[, 2],
+                        DEUp     = table.data[, 3],
+                        DEDown   = table.data[, 4])
+    return(table)
+}
