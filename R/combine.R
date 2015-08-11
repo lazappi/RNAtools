@@ -154,6 +154,7 @@ vennSets <- function(set.list) {
 
     combos <- lapply(1:length(set.list),
                      function(j) combn(names(set.list), j, simplify = FALSE))
+
     combos <- unlist(combos, recursive = FALSE)
 
     names(combos) <- sapply(combos, function(i) paste0(i, collapse = "-"))
@@ -186,7 +187,7 @@ vennGenes <- function(data.list, alpha = 0.05) {
 
         regular.data <- data.list[[name]] %>%
                         regulariseResults(name) %>%
-                        dplyr::filter(Significance <= 0.05)
+                        dplyr::filter(Significance <= alpha)
 
         gene.lists[[name]] <- regular.data$Gene
     }
@@ -194,4 +195,10 @@ vennGenes <- function(data.list, alpha = 0.05) {
     venn.genes <- vennSets(gene.lists)
 
     return(venn.genes)
+}
+
+geneSummary <- function(data.list, alpha = 0.05) {
+
+
+
 }
