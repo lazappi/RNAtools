@@ -55,27 +55,11 @@ plotFoldChange <- function(data.list, gene.set) {
                             ymin = -2,     ymax = 2,
                             xmin = -Inf,   xmax = Inf,
                             fill = "blue", alpha = 0.1, size = 0) +
-          ggplot2::theme_bw() +
           ggplot2::coord_flip() +
-          ggplot2::guides(shape = ggplot2::guide_legend(title = "Method"),
-                          colour = "none") +
+          ggplot2::guides(shape  = ggplot2::guide_legend(title = "Method"),
+                          colour = ggplot2::guide_colourbar(title = "-log Sig")) +
           ggplot2::scale_color_gradient(low = "#3f007d", high = "#ef3b2c") +
-          ggplot2:::theme(
-              axis.title   = ggplot2::element_text(size   = 20,
-                                                   face   = "bold"),
-              axis.text    = ggplot2::element_text(size   = 12,
-                                                   colour = "grey50"),
-              axis.text.y  = ggplot2::element_text(size   = 8),
-              plot.title   = ggplot2::element_text(size   = 40,
-                                                   face   = "bold",
-                                                   vjust  = 1),
-              panel.grid   = ggplot2::element_blank(),
-              panel.border = ggplot2::element_blank(),
-              axis.ticks   = ggplot2::element_blank(),
-              legend.position = c(0.85, 0.2),
-              legend.key.size = grid::unit(1, "cm"),
-              legend.title    = ggplot2::element_text(size = 12),
-              legend.text     = ggplot2::element_text(size = 12))
+          ggplot2::ylab("log Fold Change")
 
     return(gg)
 
