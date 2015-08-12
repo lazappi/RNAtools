@@ -154,6 +154,7 @@ vennSets <- function(set.list) {
 
     combos <- lapply(1:length(set.list),
                      function(j) combn(names(set.list), j, simplify = FALSE))
+
     combos <- unlist(combos, recursive = FALSE)
 
     names(combos) <- sapply(combos, function(i) paste0(i, collapse = "-"))
@@ -168,7 +169,7 @@ vennSets <- function(set.list) {
 #' Venn Genes
 #'
 #' Get list of genes for each region in a Venn diagram from a list of
-#' differential expression results
+#' differential expression results.
 #'
 #' @param data.list List of results to combine
 #' @param alpha     Significance level for selecting genes
@@ -186,7 +187,7 @@ vennGenes <- function(data.list, alpha = 0.05) {
 
         regular.data <- data.list[[name]] %>%
                         regulariseResults(name) %>%
-                        dplyr::filter(Significance <= 0.05)
+                        dplyr::filter(Significance <= alpha)
 
         gene.lists[[name]] <- regular.data$Gene
     }
@@ -195,3 +196,59 @@ vennGenes <- function(data.list, alpha = 0.05) {
 
     return(venn.genes)
 }
+
+
+#' Gene Summary
+#'
+#' Summarise the results from multiple differential expression methods by gene.
+#' Returns a table with summary statistics and a count of the number of methods
+#' that found the gene to be differentially expressed at a give significance
+#' level.
+#'
+#' @param data.list List of results to summarise
+#' @param alpha     Significance level for selecting genes
+#'
+#' @return data.table containing summary statistics
+#'
+#' @importFrom magrittr "%>%"
+#'
+#' @export
+geneSummary <- function(data.list, alpha = 0.05) {
+
+    regular.data.list <- list()
+    gene.lists        <- list()
+
+    for (name in names(data.list)) {
+
+        regular.data <- data.list[[name]] %>%
+                        regulariseResults(name)
+
+        gene.list    <- regular.data %>%
+                        dplyr::filter(Significance <= alpha) %>%
+                        data.frame() %>%
+                        magrittr::extract(, "Gene")
+
+        regular.data.list[[name]] <- regular.data
+        gene.lists[[name]]        <- gene.list
+    }
+
+    summary <- combineMatrices(regular.data.list, lengthen = FALSE) %>%
+               dplyr::group_by(Gene) %>%
+               dplyr::summarise(meanFC   = mean(FoldChange),
+                                varFC    = var(FoldChange),
+                                meanPVal = mean(pValue),
+                                varPVal  = var(pValue),
+                                meanSig  = mean(Significance),
+                                varSig   = var(Significance))
+
+    de.count <- gene.lists %>% unlist %>% table
+    de.count <- de.count[summary$Gene]
+    de.count[is.na(de.count)] <- 0
+
+    summary$DECount <- de.count
+
+    return(summary)
+
+}
+
+
