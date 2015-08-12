@@ -477,6 +477,72 @@ all.genes <- Reduce(union, venn.genes)
 length(all.genes)
 ```
 
+We can also summarise the results by gene. This tells us the mean and variance
+for log fold change, p-value and adjusted significance as well as the number of
+methods that found the gene to be differentially expressed at a given threshold.
+
+```{r gene-summary}
+gene.summ <- geneSummary(tested, alpha = 0.05)
+
+head(data.frame(gene.summ))
+```
+
+As well as providing a summary this table gives a convenient way to filter out 
+genes of interest. For example we can select those that were identified as 
+differentially expressed by two or more methods and are up-regulated.
+
+```{r gene-summ-selection}
+gene.summ.de <- gene.summ[gene.summ$DECount >= 2, ]
+gene.summ.de.up <- gene.summ.de[gene.summ.de$meanFC >= 0, ]
+
+head(data.frame(gene.summ.de.up))
+```
+
+Gene Sets
+=========
+
+Often there are sets of genes which are of particular interest such as KEGG
+pathways or those known to be associated with a particular process, response or
+condition. `RNAtools` provides functions for easily extacting and summarising
+such sets. Here we give an example using six randomly selected sets. We also
+need to supply the results from differential expression testing and a vector of
+selected differentially expressed genes.
+
+```{r gene-sets}
+set.seed(1)
+gene.sets <- list(Set1 = sample(gene.summ$Gene, 23),
+                  Set2 = sample(gene.summ$Gene, 47),
+                  Set3 = sample(gene.summ$Gene, 86),
+                  Set4 = sample(gene.summ$Gene, 63),
+                  Set5 = sample(gene.summ$Gene, 111),
+                  Set6 = sample(gene.summ$Gene, 59))
+
+setTable(tested, de.set = gene.summ.de$Gene, gene.sets = gene.sets)
+```
+
+If we are interested in specifically which genes are up or down-regulated in a
+set we can examine a plot of fold change estimates. The estimates from each
+method are shown with different shapes coloured from purple (lowly significant)
+to red (highly significant). The mean is shown as orange stars, and the shaded
+area indicates log fold change from -2 to 2. Let's look at the genes that are
+differentially expressed by at least two methods from Set2.
+
+```{r fold-change}
+plotFoldChange(data.list = tested,
+               gene.set = intersect(gene.sets$Set2, gene.summ.de$Gene))
+```
+
+For most genes we can see that the fold-change estimates are similar, however
+this is not the case at the extreme fold-change levels. Here the spread is
+wider and _DESeq_ produces infinite estimates. This effect is likely due to
+these genes having very low or zero counts in one of the conditions. We can
+confirm this by looking at the counts of the genes with lowest and highest
+fold-changes.
+
+```{r fold-change-counts}
+counts[c("ENSG00000134802", "ENSG00000131094"), ]
+```
+
 Quick Analysis
 ==============
 
