@@ -236,6 +236,8 @@ geneSummary <- function(data.list, alpha = 0.05) {
                dplyr::group_by(Gene) %>%
                dplyr::summarise(meanFC   = mean(FoldChange),
                                 varFC    = var(FoldChange),
+                                fMeanFC  = finiteMean(FoldChange),
+                                fVarFC   = finiteVar(FoldChange),
                                 meanPVal = mean(pValue),
                                 varPVal  = var(pValue),
                                 meanSig  = mean(Significance),
