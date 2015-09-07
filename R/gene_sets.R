@@ -83,6 +83,16 @@ setTable <- function(data.list, de.set, gene.sets) {
 
     gene.summary <- geneSummary(data.list)
 
+    genes.up <-  gene.summary %>%
+                 dplyr::filter(meanFC > 0) %>%
+                 as.data.frame() %>%
+                 magrittr::extract(, "Gene")
+
+    genes.dn <-  gene.summary %>%
+                 dplyr::filter(meanFC <= 0) %>%
+                 as.data.frame() %>%
+                 magrittr::extract(, "Gene")
+
     de.set.up <- gene.summary %>%
                  dplyr::filter(Gene %in% de.set) %>%
                  dplyr::filter(meanFC > 0) %>%
@@ -96,21 +106,25 @@ setTable <- function(data.list, de.set, gene.sets) {
                  magrittr::extract(, "Gene")
 
     table.data <- lapply(gene.sets,
-                         function(x) {
-                             total <- length(x)
-                             de    <- length(intersect(x, de.set))
-                             de.up <- length(intersect(x, de.set.up))
-                             de.dn <- length(intersect(x, de.set.dn))
-                             return(c(total, de, de.up, de.dn))
+                         function(set) {
+                             total <- length(set)
+                             up    <- length(intersect(set, genes.up))
+                             dn    <- length(intersect(set, genes.dn))
+                             de    <- length(intersect(set, de.set))
+                             de.up <- length(intersect(set, de.set.up))
+                             de.dn <- length(intersect(set, de.set.dn))
+                             return(c(total, up, dn, de, de.up, de.dn))
                          }
                     )
 
-    table.data <- table.data %>% unlist %>% matrix(ncol = 4, byrow = TRUE)
+    table.data <- table.data %>% unlist %>% matrix(ncol = 6, byrow = TRUE)
 
     table <- data.frame(Set      = names(gene.sets),
                         NumGenes = table.data[, 1],
-                        DE       = table.data[, 2],
-                        DEUp     = table.data[, 3],
-                        DEDown   = table.data[, 4])
+                        Up       = table.data[, 2],
+                        Down     = table.data[, 3],
+                        DE       = table.data[, 4],
+                        DEUp     = table.data[, 5],
+                        DEDown   = table.data[, 6])
     return(table)
 }
