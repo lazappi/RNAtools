@@ -12,7 +12,7 @@ using _ggplot2_, allowing for easy modification by the user.
 ## Installation
 
 Several of the packages used by RNAtools are only available from
-(Bioconductor)[www.bioconductor.org] so we need to install those first.
+[Bioconductor](www.bioconductor.org) so we need to install those first.
 
 ```r
 source("http://bioconductor.org/biocLite.R")
