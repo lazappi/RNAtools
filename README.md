@@ -19,13 +19,17 @@ source("http://bioconductor.org/biocLite.R")
 biocLite(c("edgeR", "DESeq", "DESeq2", "limma", "genefilter", "HTSFilter"))
 ```
 
-RNAtools can now easily be installed from Github using the __devtools__ package.
+RNAtools can now easily be installed from Github using the _devtools_ package.
 
 ```r
 install.packages("devtools")
 library("devtools")
 install_github("lazappi/RNAtools")
 ```
+
+If you are using Windows you will be prompted to also install
+[Rtools](https://cran.r-project.org/bin/windows/Rtools/index.html). While
+this is recommended RNAtools should install fine without it.
 
 ## Guide
 
