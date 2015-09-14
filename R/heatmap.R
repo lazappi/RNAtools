@@ -94,10 +94,10 @@ makeHeatmap <- function(data, dist.mat = FALSE) {
     }
 
     # Get data for dendrograms
-    row.dendro <- ggdendro::dendro_data.dendrogram(as.dendrogram(row.hc),
-                                                   type = "rectangle")
-    col.dendro <- ggdendro::dendro_data.dendrogram(as.dendrogram(col.hc),
-                                                   type = "rectangle")
+    row.dendro <- ggdendro::dendro_data(as.dendrogram(row.hc),
+                                        type = "rectangle")
+    col.dendro <- ggdendro::dendro_data(as.dendrogram(col.hc),
+                                        type = "rectangle")
 
     # Produce dendrograms
     row.plot <- heatmapDendro(row.dendro, rows = TRUE) +
