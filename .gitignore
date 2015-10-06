@@ -13,5 +13,7 @@ vignettes/*.html
 vignettes/*.pdf
 vignettes/*cache
 vignettes/*files
+# Log files
+*.log
 .Rproj.user
 #inst/doc
