@@ -15,7 +15,7 @@ jaccardTable(data.list, alpha = 0.05)
 dataframe containing Jaccard indices
 }
 \description{
-Produce a table of Jaccard Indices from a list of differential expression
-results
+Produce a table of Jaccard Indices from a list of regularised differential
+expression results
 }
 

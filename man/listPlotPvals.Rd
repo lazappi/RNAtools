@@ -15,6 +15,7 @@ listPlotPvals(data.list, alpha = 0.05)
 List of ggplot2 objects containing p-value histograms
 }
 \description{
-Plot hitograms of p-values from a list of differential expression results
+Plot histograms of p-values from a list of regularised differential
+expression results
 }
 
