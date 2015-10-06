@@ -37,10 +37,14 @@ knitr::opts_chunk$set(
                )
 ```
 
+<div style="text-align:center" markdown="1">
+![RNAtools](logo.png)
+</div>
+
 Welcome!
 ========
 
-Welcome to RNAtools! Many studies across the life science now make use of
+Welcome to RNAtools! Many studies across the life sciences now make use of
 RNA-seq to investigate gene products. These experiments can provide high-quality
 measurements of gene expression across a wide dynamic range, and in contrast to
 microarracy experiments do not require probes to be designed for specific
