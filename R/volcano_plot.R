@@ -13,23 +13,19 @@
 listVolcano <- function(data.list, alpha = 0.05) {
 
     plots <- list()
-    regular.data.list <- list()
 
     # Produce individual plots
     for (name in names(data.list)) {
 
         data <- data.list[[name]]
 
-        regular.data <- regulariseResults(data, name)
+        gg <- volcanoPlot(data, method = "regular")
 
-        gg <- volcanoPlot(regular.data, method = "regular")
-
-        regular.data.list[[name]] <- regular.data
         plots[[name]] <- gg
     }
 
     # Produce combined plot
-    gg <- regular.data.list %>%
+    gg <- data.list %>%
           combineMatrices(lengthen = FALSE) %>%
           dplyr::mutate(logSig = -log(Significance)) %>%
           dplyr::mutate(logSig = replace(logSig, is.na(logSig), -Inf)) %>%

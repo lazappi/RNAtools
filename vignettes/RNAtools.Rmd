@@ -351,6 +351,24 @@ group2 <- "Ramos B cell"
 tested <- listTest(normalised, group1, group2, filter = TRUE)
 ```
 
+Each method produces results in it's own format. In order to make them easier to
+combine we convert them to a regular format which can be used by plotting and
+other functions.
+
+```{r regularise}
+results <- listRegularise(tested)
+
+head(results[[1]])
+```
+
+This format has five columns:
+
+1. **Gene** - the gene name or identifier
+2. **FoldChange** - the estimate of log fold-change
+3. **Abundance** - the estimate of average expression across samples
+4. **Significance** - the adjusted p-value
+5. **pValue** - the unadjusted p-value
+
 P-values
 --------
 
@@ -360,7 +378,7 @@ to the null hypothesis and a peak at low p-values for significant results that
 reject the null. We can easily look at the distribution of our results.
 
 ```{r p-values}
-pval.plots <- listPlotPvals(tested, alpha = 0.05)
+pval.plots <- listPlotPvals(results, alpha = 0.05)
 
 pval.plots$combined
 ```
@@ -380,7 +398,7 @@ MA Plots
 We can now produce MA plots of our results.
 
 ```{r results-MA}
-results.ma <- listResultsMA(tested, alpha = 0.05)
+results.ma <- listResultsMA(results, alpha = 0.05)
 
 results.ma$combined
 ```
@@ -395,7 +413,7 @@ particular _edgeR's_ `plotSmear` may be worthwhile examining as it adds some
 additional features.
 
 ```{r plotSmear}
-genes.de.names <- rownames(tested$edgeR)[tested$edgeR$FDR < 0.05]
+genes.de.names <- rownames(results$edgeR)[results$edgeR$FDR < 0.05]
 edgeR::plotSmear(normalised$edgeR, de.tags = genes.de.names)
 
 rm(genes.de.names)
@@ -411,7 +429,7 @@ genes that returned significance of zero (top), or were missing p-values
 (bottom). 
 
 ```{r volcano}
-volcanos <- listVolcano(tested)
+volcanos <- listVolcano(results)
 
 volcanos$combined
 ```
@@ -431,7 +449,7 @@ to compare them. The Jaccard can be used to compare two lists and is calculated
 as the number of items in the intersect divided by the number in the union.
 
 ```{r jaccard}
-jaccardTable(tested, alpha = 0.05)
+jaccardTable(results, alpha = 0.05)
 ```
 
 From the number of genes identified by the methods we can see that _edgeR_ and
@@ -443,7 +461,7 @@ another excellent package _VennDiagram_, which provides a _grid_ graphics
 object.
 
 ```{r venn, fig.height = 7}
-venn <- geneVenn(tested, alpha = 0.05)
+venn <- geneVenn(results, alpha = 0.05)
 
 plot.new()
 grid::grid.draw(venn)
@@ -463,7 +481,7 @@ the genes that are in that segment but not anywhere else. The lengths should be
 the same as the numbers in the Venn diagram.
 
 ```{r venn-gene}
-venn.genes <- vennGenes(tested, alpha = 0.05)
+venn.genes <- vennGenes(results, alpha = 0.05)
 
 sapply(venn.genes, length)
 ```
@@ -482,7 +500,7 @@ for log fold change, p-value and adjusted significance as well as the number of
 methods that found the gene to be differentially expressed at a given threshold.
 
 ```{r gene-summary}
-gene.summ <- geneSummary(tested, alpha = 0.05)
+gene.summ <- geneSummary(results, alpha = 0.05)
 
 head(data.frame(gene.summ))
 ```
@@ -517,7 +535,7 @@ gene.sets <- list(Set1 = sample(gene.summ$Gene, 23),
                   Set5 = sample(gene.summ$Gene, 111),
                   Set6 = sample(gene.summ$Gene, 59))
 
-setTable(tested, de.set = gene.summ.de$Gene, gene.sets = gene.sets)
+setTable(results, de.set = gene.summ.de$Gene, gene.sets = gene.sets)
 ```
 
 If we are interested in specifically which genes are up or down-regulated in a
@@ -528,7 +546,7 @@ area indicates log fold change from -2 to 2. Let's look at the genes that are
 differentially expressed by at least two methods from Set2.
 
 ```{r fold-change}
-plotFoldChange(data.list = tested,
+plotFoldChange(data.list = results,
                gene.set = intersect(gene.sets$Set2, gene.summ.de$Gene))
 ```
 
@@ -569,8 +587,9 @@ if (requireNamespace("pasilla", quietly = TRUE) &&
     normalised <- listNorm(objects)
     tested <- listTest(normalised, group1 = group1, group2 = group2,
                        filter = TRUE)
+    results <- listRegularise(tested)
     
-    venn <- geneVenn(tested, alpha = 0.05)
+    venn <- geneVenn(results, alpha = 0.05)
 
     plot.new()
     grid::grid.draw(venn)
