@@ -166,7 +166,7 @@ listResultsMA <- function(data.list, alpha = 0.05) {
           ggplot2::annotate("rect",
                             xmin = -Inf, xmax = Inf,
                             ymin = -2, ymax = 2,
-                            alpha = 0.6, fill = "grey", size = 0) +
+                            alpha = 0.2, fill = "blue", size = 0) +
           ggplot2::geom_point() +
           ggplot2::facet_wrap(~ matrix) +
           ggplot2::geom_hline(yintercept = 0, colour = "blue") +
@@ -246,9 +246,9 @@ resultsMA <- function(results,
                           ggplot2::aes(x = Abundance, y = FoldChange,
                                        colour = DE)) +
           ggplot2::annotate("rect",
-                            xmin = -Inf, xmax = Inf,
-                            ymin = -2, ymax = 2,
-                            alpha = 0.6, fill = "grey", size = 0) +
+                            xmin  = -Inf, xmax = Inf,
+                            ymin  = -2,   ymax = 2,
+                            alpha = 0.2,  fill = "blue", size = 0) +
           ggplot2::geom_point() +
           ggplot2::geom_hline(yintercept = 0, colour = "blue") +
           ggplot2::scale_colour_manual(values = c("black", "red")) +

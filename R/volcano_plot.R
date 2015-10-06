@@ -41,11 +41,11 @@ listVolcano <- function(data.list, alpha = 0.05) {
           ggplot2::annotate("rect",
                             xmin = -Inf, xmax = Inf,
                             ymin = -Inf, ymax = -log(alpha),
-                            alpha = 0.2, fill = "blue", size = 0) +
+                            alpha = 0.2, fill = "red", size = 0) +
           ggplot2::annotate("rect",
                             xmin = -2,   xmax = 2,
                             ymin = -Inf, ymax = Inf,
-                            alpha = 0.2, fill = "red", size = 0) +
+                            alpha = 0.2, fill = "blue", size = 0) +
           ggplot2::geom_point(size = 4) +
           ggplot2::facet_wrap(~ matrix) +
           ggplot2::scale_color_gradient(low = "#3f007d", high = "#ef3b2c") +
@@ -102,11 +102,11 @@ volcanoPlot <- function(results,
           ggplot2::annotate("rect",
                             xmin = -Inf, xmax = Inf,
                             ymin = -Inf, ymax = -log(alpha),
-                            alpha = 0.2, fill = "blue", size = 0) +
+                            alpha = 0.2, fill = "red", size = 0) +
           ggplot2::annotate("rect",
                             xmin = -2,   xmax = 2,
                             ymin = -Inf, ymax = Inf,
-                            alpha = 0.2, fill = "red", size = 0) +
+                            alpha = 0.2, fill = "blue", size = 0) +
           ggplot2::geom_point(size = 4) +
           ggplot2::scale_color_gradient(low = "#3f007d", high = "#ef3b2c") +
           ggplot2::xlab("log Fold Change") +
