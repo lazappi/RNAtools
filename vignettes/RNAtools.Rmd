@@ -47,7 +47,7 @@ Welcome!
 Welcome to RNAtools! Many studies across the life sciences now make use of
 RNA-seq to investigate gene products. These experiments can provide high-quality
 measurements of gene expression across a wide dynamic range, and in contrast to
-microarracy experiments do not require probes to be designed for specific
+microarray experiments, do not require probes to be designed for specific
 regions.
 
 Perhaps the most common analysis pipeline for RNA-seq data is to perform
@@ -61,9 +61,9 @@ the biological implications of these changes in regulation.
 Multiple methods exist for each of these steps. This package takes a matrix of
 summarised counts for a group of samples and provides a unified interface for
 differential expression testing (using _edgeR_, _DESeq_, _DESeq2_ and
-_limma-voom_) and functional analysis. The aim is allow simultaneous analysis 
-using multiple packages including robust quality control, easily comparable 
-visulisations and combination of results.
+_limma-voom_). The aim is allow simultaneous analysis using multiple packages 
+including robust quality control, easily comparable visulisations and
+combination of results.
 
 Before we get started let's load the _RNAtools_ package:
 
@@ -77,9 +77,10 @@ Data
 For this vignette we are going to make use of data from Sultan et al. available
 from the _HTSFilter_ package. This dataset contains two biological replicates
 from a human embryonic kidney and B cell line. The raw read count and phenotype
-table are available as part of the ReCount online resource.
+table are available as part of the
+[ReCount](http://bowtie-bio.sourceforge.net/recount/) online resource.
 
-We first load _HTSFilter_ then we can start by attaching the data in `sultan`. 
+We first load _HTSFilter_, then we can start by attaching the data in `sultan`. 
 Other information is available but we are just interested in the matrix of
 counts and the groups for each sample:
 
@@ -234,14 +235,14 @@ names(heatmap)
 showHeatmap(heatmap)
 ```
 
+PCA and MDS
+-----------
+
 Principal component analysis (PCA) can also be useful for visualising the
-similarities between samples, in particular identifying outliers and batch \
+similarities between samples, in particular identifying outliers and batch
 effects. PCA reduces the dimensionality of a dataset to identify the directions
 with greatest variance. Plotting samples onto the reduced dimensions allows
 quick comparisons.
-
-PCA and MDS
------------
 
 ```{r PCA}
 PCA <- listPCA(transformed, top = 500, groups = groups)
@@ -254,7 +255,7 @@ top 500 most variable genes, and provide groups to colour the labels. As we are
 looking for differentially expressed genes we hope to see a clear separation
 between the two groups, as is the case along PC1.
 
-Multidimenionsal scaling (MDS) provides an alternative to PCA that aims to
+Multi-dimensional scaling (MDS) provides an alternative to PCA that aims to
 visually represent the distances amongst a set of samples. Genes can be selected
 based on "common" deviations across all samples (similar to what was done with
 PCA) or "pairwise" between each pair of samples.
@@ -301,11 +302,11 @@ number of tests and possibly increase the number of genes found to be
 significantly differentially expressed.
 
 The _HTSFilter_ package provides a method for independently filtering genes in 
-datasets with biological replicates. There several stages of the process where
-filtering could theoretically be applied. By setting the `filter` option in
-`counts2objects` and related functions we conduct filtering when suggested by
-the _HTSFilter_ author. Unfortunately the appropriate stage is different for
-eachmethod. For example for _voom_ no methods for normalised datasets exist so
+datasets with biological replicates. There are several stages of the process 
+where filtering could theoretically be applied. By setting the `filter` option
+in `counts2objects` and related functions we conduct filtering when suggested by
+the _HTSFilter_ authors. Unfortunately the appropriate stage is different for
+each method. For example for _voom_ no methods for normalised datasets exist, so
 the most appropriate stage is when constructing objects from the raw counts.
 
 ```{r filtering}
@@ -314,10 +315,11 @@ nrow(counts)
 nrow(objects$voom$counts)
 ```
 
- _HTSFilter_ can produce a plot that shows how the filtering threshold is chosen. 
-Basically it attempts to find that a value that removes the same number of
-genes from each group of samples. To avoid cluttering analysis this plot is
-suppresed by a message showing the chosen threshold is printed to the console.
+ _HTSFilter_ can produce a plot that shows how the filtering threshold is
+chosen. Basically it attempts to find that a value that removes the same number
+of genes from each group of samples. To avoid cluttering the analysis this plot
+is suppresed but a message showing the chosen threshold is printed to the
+console.
 
 If you prefer not to use _HTSFilter_ (for example if you don't have biological
 replicates) the authors of _edgeR_ suggest an alternative approach where genes
@@ -344,9 +346,9 @@ Testing
 
 Once the data has been normalised we can test for differential expression. We 
 first need to assign the groups we would like to test as `group1`, the
-reference or control, and `group1` the treament. The control group should always 
-be whichever group was defined as the lowest level of the `groups` factor. Again
-a list function allows use to perform all methods simultaneously.
+reference or control, and `group2` the treatment. The control group should
+always be whichever group was defined as the lowest level of the `groups`
+factor. Again a list function allows us to perform all methods simultaneously.
 
 ```{r test}
 group1 <- "HEK293T"
@@ -387,7 +389,7 @@ pval.plots <- listPlotPvals(results, alpha = 0.05)
 pval.plots$combined
 ```
 
-Our results seem have been computed correctly. We see a consistent rectangle
+Our results seem to have been computed correctly. We see a consistent rectangle
 across most p-values with significant peaks at low values suggesting that there
 are many differently expressed genes. Here the shaded red area shows p-values
 less than 0.05. If you were to see a different pattern, such as hill or u-shaped
@@ -407,28 +409,26 @@ results.ma <- listResultsMA(results, alpha = 0.05)
 results.ma$combined
 ```
 
-Here we plot log average expression level against the log fold change estimated
-by each method. The genes with adjust p-values greater than alpha are coloured
-in red, the blue line indicates log fold change equal to zero and the shaded
-area log fold change with magnitude less than two. 
+Here we plot log average expression level against the log fold-change estimated
+by each method. The genes with adjusted p-values greater than $alpha$ are
+coloured in red, the blue line indicates log fold-change equal to zero and the 
+shaded area log fold-change with magnitude less than two. 
 
 The individual packages have their own functions for creating these plots. In
 particular _edgeR's_ `plotSmear` may be worthwhile examining as it adds some
 additional features.
 
 ```{r plotSmear}
-genes.de.names <- rownames(results$edgeR)[results$edgeR$FDR < 0.05]
+genes.de.names <- rownames(tested$edgeR)[tested$edgeR$FDR < 0.05]
 edgeR::plotSmear(normalised$edgeR, de.tags = genes.de.names)
-
-rm(genes.de.names)
 ```
 
 Volcano Plots
 -------------
 
-An alternative to MA plots are volcano plots which show fold change against
-significance. The red shaded area shows absolute log fold changes less than two
-and the blue area significance levels less than 0.05. Grey points indicate
+An alternative to MA plots are volcano plots which show log fold-change against
+significance. The blue shaded area shows absolute log fold-changes less than two
+and the red area significance levels less than 0.05. Grey points indicate
 genes that returned significance of zero (top), or were missing p-values
 (bottom). 
 
@@ -438,7 +438,7 @@ volcanos <- listVolcano(results)
 volcanos$combined
 ```
 
-Voom typically returns much lower significance levels so it can be preferable
+Voom often returns much lower significance levels so it can be preferable
 to look at that plot separately.
 
 ```{r voom-volcano}
@@ -449,19 +449,20 @@ Combining Results
 =================
 
 Once we are satisfied that the results from each method look good we can begin
-to compare them. The Jaccard can be used to compare two lists and is calculated
-as the number of items in the intersect divided by the number in the union.
+to compare them. The Jaccard index can be used to compare two lists and is 
+calculated as the number of items in the intersection divided by the number in
+the union.
 
 ```{r jaccard}
 jaccardTable(results, alpha = 0.05)
 ```
 
 From the number of genes identified by the methods we can see that _edgeR_ and
-_voom_ have called many more genes as significantly differentially expressed.
+_voom_ have called more genes as significantly differentially expressed.
 The indices suggest that the two versions of _DESeq_ are more similar to each
 other than the other two methods. Another way to view the lists is via a Venn
-diagram. Unfortunately _ggplot2_ is not capable of these so we make use of
-another excellent package _VennDiagram_, which provides a _grid_ graphics
+diagram. Unfortunately _ggplot2_ is not (easily) capable of these so we make use 
+of another excellent package, _VennDiagram_, which returns a _grid_ graphics
 object.
 
 ```{r venn, fig.height = 7}
@@ -500,8 +501,10 @@ length(all.genes)
 ```
 
 We can also summarise the results by gene. This tells us the mean and variance
-for log fold change, p-value and adjusted significance as well as the number of
+for log fold-change, p-value and adjusted significance as well as the number of
 methods that found the gene to be differentially expressed at a given threshold.
+Columns beginning with 'f' are finite summaries, ignoring infinite values
+produced by some of the methods.
 
 ```{r gene-summary}
 gene.summ <- geneSummary(results, alpha = 0.05)
@@ -525,7 +528,7 @@ Gene Sets
 
 Often there are sets of genes which are of particular interest such as KEGG
 pathways or those known to be associated with a particular process, response or
-condition. `RNAtools` provides functions for easily extacting and summarising
+condition. RNAtools provides functions for easily extacting and summarising
 such sets. Here we give an example using six randomly selected sets. We also
 need to supply the results from differential expression testing and a vector of
 selected differentially expressed genes.
@@ -543,10 +546,10 @@ setTable(results, de.set = gene.summ.de$Gene, gene.sets = gene.sets)
 ```
 
 If we are interested in specifically which genes are up or down-regulated in a
-set we can examine a plot of fold change estimates. The estimates from each
+set we can examine a plot of fold change-estimates. The estimates from each
 method are shown with different shapes coloured from purple (lowly significant)
 to red (highly significant). The mean is shown as orange stars, and the shaded
-area indicates log fold change from -2 to 2. Let's look at the genes that are
+area indicates log fold-change from -2 to 2. Let's look at the genes that are
 differentially expressed by at least two methods from Set2.
 
 ```{r fold-change}
