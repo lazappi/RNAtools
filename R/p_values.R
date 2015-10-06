@@ -1,6 +1,7 @@
 #' List p-value plots
 #'
-#' Plot hitograms of p-values from a list of differential expression results
+#' Plot histograms of p-values from a list of regularised differential
+#' expression results
 #'
 #' @param data.list List of results to plot
 #' @param alpha     Significance level for shading
@@ -13,23 +14,19 @@
 listPlotPvals <- function(data.list, alpha = 0.05) {
 
     plots <- list()
-    regular.data.list <- list()
 
     # Produce individual plots
     for (name in names(data.list)) {
 
         data <- data.list[[name]]
 
-        regular.data <- regulariseResults(data, name)
+        gg <- plotPvals(data, method = "regular")
 
-        gg <- plotPvals(regular.data, method = "regular")
-
-        regular.data.list[[name]] <- regular.data
         plots[[name]] <- gg
     }
 
     # Produce combine plot
-    gg <- regular.data.list %>%
+    gg <- data.list %>%
           combineMatrices(lengthen = FALSE) %>%
           ggplot2::ggplot(ggplot2::aes(x = pValue)) +
           ggplot2::annotate("rect",

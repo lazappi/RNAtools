@@ -128,7 +128,7 @@ getMAData <- function(data) {
 
 #' List Results MA
 #'
-#' Plot MA plots from a list of differential expression results
+#' Plot MA plots from a list of regularised differential expression results
 #'
 #' @param data.list List of results to plot
 #' @param alpha     Significance level for labelling differentially
@@ -142,23 +142,19 @@ getMAData <- function(data) {
 listResultsMA <- function(data.list, alpha = 0.05) {
 
     plots <- list()
-    regular.data.list <- list()
 
     # Produce individual plots
     for (name in names(data.list)) {
 
         data <- data.list[[name]]
 
-        regular.data <- regulariseResults(data, name)
+        gg <- resultsMA(data, method = "regular", alpha = alpha)
 
-        gg <- resultsMA(regular.data, method = "regular", alpha = alpha)
-
-        regular.data.list[[name]] <- regular.data
         plots[[name]] <- gg
     }
 
     # Produce combined plot
-    gg <- regular.data.list %>%
+    gg <- data.list %>%
           combineMatrices(lengthen = FALSE) %>%
           dplyr::mutate(DE = Significance < alpha) %>%
           ggplot2::ggplot(ggplot2::aes(x = Abundance, y = FoldChange,
@@ -174,7 +170,6 @@ listResultsMA <- function(data.list, alpha = 0.05) {
           ggplot2::xlab("log Abundance") +
           ggplot2::ylab("log Fold Change") +
           ggplot2::theme(legend.position = "none")
-
 
     plots[["combined"]] <- gg
 

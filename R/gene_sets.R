@@ -17,18 +17,17 @@ plotFoldChange <- function(data.list, gene.set) {
 
     gene.set <- sort(gene.set)
 
-    regular.data.list <- list()
+    data.list.filt <- list()
 
     for (name in names(data.list)) {
 
-        regular.data <- data.list[[name]] %>%
-                        regulariseResults(name) %>%
-                        dplyr::filter(Gene %in% gene.set)
+        data.filt <- data.list[[name]] %>%
+                     dplyr::filter(Gene %in% gene.set)
 
-        regular.data.list[[name]] <- regular.data
+        data.list.filt[[name]] <- data.filt
     }
 
-    plot.data <- combineMatrices(regular.data.list, lengthen = FALSE)
+    plot.data <- combineMatrices(data.list.filt, lengthen = FALSE)
 
     order <- plot.data %>%
              dplyr::group_by(Gene) %>%
@@ -62,7 +61,6 @@ plotFoldChange <- function(data.list, gene.set) {
           ggplot2::ylab("log Fold Change")
 
     return(gg)
-
 }
 
 #' Gene Set Table

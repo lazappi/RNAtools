@@ -1,7 +1,7 @@
 #' Gene Venn Diagram
 #'
-#' Produce a Venn diagram of significant genes from a list of differential
-#' expression results
+#' Produce a Venn diagram of significant genes from a list of regularised
+#' differential expression results
 #'
 #' @param data.list List of results to combine
 #' @param alpha     Significance level for selecting genes
@@ -18,7 +18,6 @@ geneVenn <- function(data.list, alpha = 0.05) {
     for (name in names(data.list)) {
 
         genes <- data.list[[name]] %>%
-                 regulariseResults(name) %>%
                  dplyr::filter(Significance <= 0.05)
 
         gene.lists[[name]] <- genes$Gene
@@ -48,8 +47,8 @@ geneVenn <- function(data.list, alpha = 0.05) {
 
 #' Jaccard Table
 #'
-#' Produce a table of Jaccard Indices from a list of differential expression
-#' results
+#' Produce a table of Jaccard Indices from a list of regularised differential
+#' expression results
 #'
 #' @param data.list List of results to combine
 #' @param alpha     Significance level for selecting genes
@@ -61,18 +60,7 @@ geneVenn <- function(data.list, alpha = 0.05) {
 #' @export
 jaccardTable <- function(data.list, alpha = 0.05) {
 
-    regular.data.list <- list()
-
-    for (name in names(data.list)) {
-
-        data <- data.list[[name]]
-
-        regular.data <- regulariseResults(data, name)
-
-        regular.data.list[[name]] <- regular.data
-    }
-
-    ndata <- length(regular.data.list)
+    ndata <- length(data.list)
 
     jaccard.mat <- matrix(nrow = ndata, ncol = ndata)
 
@@ -80,7 +68,7 @@ jaccardTable <- function(data.list, alpha = 0.05) {
 
     for(i in 1:ndata) {
 
-        data1 <- regular.data.list[[i]] %>%
+        data1 <- data.list[[i]] %>%
                  dplyr::filter(Significance <= alpha)
 
         data1 <- data1$Gene
@@ -89,7 +77,7 @@ jaccardTable <- function(data.list, alpha = 0.05) {
 
         for(j in 1:ndata) {
 
-            data2 <- regular.data.list[[j]] %>%
+            data2 <- data.list[[j]] %>%
                      dplyr::filter(Significance <= alpha)
 
             data2 <- data2$Gene
@@ -108,28 +96,10 @@ jaccardTable <- function(data.list, alpha = 0.05) {
     return(jaccard.table)
 }
 
-vennSets <- function(set.list) {
-
-    set.names <- names(set.list)
-
-    combos <- lapply(1:length(set.list),
-                     function(j) combn(names(set.list), j, simplify = FALSE))
-
-    combos <- unlist(combos, recursive = FALSE)
-
-    names(combos) <- sapply(combos, function(i) paste0(i, collapse = "-"))
-
-    venn.sets <- lapply(combos,
-                        function(i) listSetdiff(set.list[i],
-                                               set.list[setdiff(set.names, i)]))
-
-    return(venn.sets)
-}
-
 #' Venn Genes
 #'
 #' Get list of genes for each region in a Venn diagram from a list of
-#' differential expression results.
+#' regularised differential expression results.
 #'
 #' @param data.list List of results to combine
 #' @param alpha     Significance level for selecting genes
@@ -146,7 +116,6 @@ vennGenes <- function(data.list, alpha = 0.05) {
     for (name in names(data.list)) {
 
         regular.data <- data.list[[name]] %>%
-                        regulariseResults(name) %>%
                         dplyr::filter(Significance <= alpha)
 
         gene.lists[[name]] <- regular.data$Gene
@@ -156,7 +125,6 @@ vennGenes <- function(data.list, alpha = 0.05) {
 
     return(venn.genes)
 }
-
 
 #' Gene Summary
 #'
@@ -175,24 +143,21 @@ vennGenes <- function(data.list, alpha = 0.05) {
 #' @export
 geneSummary <- function(data.list, alpha = 0.05) {
 
-    regular.data.list <- list()
-    gene.lists        <- list()
+    gene.lists <- list()
 
     for (name in names(data.list)) {
 
-        regular.data <- data.list[[name]] %>%
-                        regulariseResults(name)
+        data      <- data.list[[name]]
 
-        gene.list    <- regular.data %>%
-                        dplyr::filter(Significance <= alpha) %>%
-                        data.frame() %>%
-                        magrittr::extract(, "Gene")
+        gene.list <- data %>%
+                     dplyr::filter(Significance <= alpha) %>%
+                     data.frame() %>%
+                     magrittr::extract(, "Gene")
 
-        regular.data.list[[name]] <- regular.data
         gene.lists[[name]]        <- gene.list
     }
 
-    summary <- combineMatrices(regular.data.list, lengthen = FALSE) %>%
+    summary <- combineMatrices(data.list, lengthen = FALSE) %>%
                dplyr::group_by(Gene) %>%
                dplyr::summarise(meanFC   = mean(FoldChange),
                                 varFC    = var(FoldChange),
