@@ -16,6 +16,6 @@ listResultsMA(data.list, alpha = 0.05)
 List of ggplot2 object containing MA plots
 }
 \description{
-Plot MA plots from a list of differential expression results
+Plot MA plots from a list of regularised differential expression results
 }
 

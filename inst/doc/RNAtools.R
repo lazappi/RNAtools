@@ -25,26 +25,6 @@ knitr::opts_chunk$set(
                         warning        = FALSE
                )
 
-## ----libraries-----------------------------------------------------------
-library("RNAtools")
-
-## ----data----------------------------------------------------------------
-library("HTSFilter")
-
-data("sultan")
-
-counts <- exprs(sultan)
-groups <- pData(sultan)$cell.line
-
-rm(sultan)
-
-groups
-
-head(counts)
-
-## ----count-density-------------------------------------------------------
-countDensity(counts)
-
 ## ----count-density-bw----------------------------------------------------
 countDensity(counts) + ggplot2::theme_bw() + ggplot2::ggtitle("Count Densities")
 
@@ -117,13 +97,18 @@ group2 <- "Ramos B cell"
 
 tested <- listTest(normalised, group1, group2, filter = TRUE)
 
+## ----regularise----------------------------------------------------------
+results <- listRegularise(tested)
+
+head(results[[1]])
+
 ## ----p-values------------------------------------------------------------
-pval.plots <- listPlotPvals(tested, alpha = 0.05)
+pval.plots <- listPlotPvals(results, alpha = 0.05)
 
 pval.plots$combined
 
 ## ----results-MA----------------------------------------------------------
-results.ma <- listResultsMA(tested, alpha = 0.05)
+results.ma <- listResultsMA(results, alpha = 0.05)
 
 results.ma$combined
 
@@ -131,10 +116,8 @@ results.ma$combined
 genes.de.names <- rownames(tested$edgeR)[tested$edgeR$FDR < 0.05]
 edgeR::plotSmear(normalised$edgeR, de.tags = genes.de.names)
 
-rm(genes.de.names)
-
 ## ----volcano-------------------------------------------------------------
-volcanos <- listVolcano(tested)
+volcanos <- listVolcano(results)
 
 volcanos$combined
 
@@ -142,10 +125,10 @@ volcanos$combined
 volcanos$voom
 
 ## ----jaccard-------------------------------------------------------------
-jaccardTable(tested, alpha = 0.05)
+jaccardTable(results, alpha = 0.05)
 
 ## ----venn, fig.height = 7------------------------------------------------
-venn <- geneVenn(tested, alpha = 0.05)
+venn <- geneVenn(results, alpha = 0.05)
 
 plot.new()
 grid::grid.draw(venn)
@@ -154,7 +137,7 @@ text(0.5, 0, "Number of Differentially Expressed Genes",
      vfont = c("serif", "plain"), cex = 1.5)
 
 ## ----venn-gene-----------------------------------------------------------
-venn.genes <- vennGenes(tested, alpha = 0.05)
+venn.genes <- vennGenes(results, alpha = 0.05)
 
 sapply(venn.genes, length)
 
@@ -164,7 +147,7 @@ all.genes <- Reduce(union, venn.genes)
 length(all.genes)
 
 ## ----gene-summary--------------------------------------------------------
-gene.summ <- geneSummary(tested, alpha = 0.05)
+gene.summ <- geneSummary(results, alpha = 0.05)
 
 head(data.frame(gene.summ))
 
@@ -183,10 +166,10 @@ gene.sets <- list(Set1 = sample(gene.summ$Gene, 23),
                   Set5 = sample(gene.summ$Gene, 111),
                   Set6 = sample(gene.summ$Gene, 59))
 
-setTable(tested, de.set = gene.summ.de$Gene, gene.sets = gene.sets)
+setTable(results, de.set = gene.summ.de$Gene, gene.sets = gene.sets)
 
 ## ----fold-change---------------------------------------------------------
-plotFoldChange(data.list = tested,
+plotFoldChange(data.list = results,
                gene.set = intersect(gene.sets$Set2, gene.summ.de$Gene))
 
 ## ----fold-change-counts--------------------------------------------------
@@ -211,8 +194,9 @@ if (requireNamespace("pasilla", quietly = TRUE) &&
     normalised <- listNorm(objects)
     tested <- listTest(normalised, group1 = group1, group2 = group2,
                        filter = TRUE)
+    results <- listRegularise(tested)
     
-    venn <- geneVenn(tested, alpha = 0.05)
+    venn <- geneVenn(results, alpha = 0.05)
 
     plot.new()
     grid::grid.draw(venn)

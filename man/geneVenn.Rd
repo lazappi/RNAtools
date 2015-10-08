@@ -15,7 +15,7 @@ geneVenn(data.list, alpha = 0.05)
 Venn diagram object
 }
 \description{
-Produce a Venn diagram of significant genes from a list of differential
-expression results
+Produce a Venn diagram of significant genes from a list of regularised
+differential expression results
 }
 

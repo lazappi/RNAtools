@@ -16,6 +16,6 @@ List of vectors of genes
 }
 \description{
 Get list of genes for each region in a Venn diagram from a list of
-differential expression results.
+regularised differential expression results.
 }
 
