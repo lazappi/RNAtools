@@ -25,26 +25,6 @@ knitr::opts_chunk$set(
                         warning        = FALSE
                )
 
-## ----libraries-----------------------------------------------------------
-library("RNAtools")
-
-## ----data----------------------------------------------------------------
-library("HTSFilter")
-
-data("sultan")
-
-counts <- exprs(sultan)
-groups <- pData(sultan)$cell.line
-
-rm(sultan)
-
-groups
-
-head(counts)
-
-## ----count-density-------------------------------------------------------
-countDensity(counts)
-
 ## ----count-density-bw----------------------------------------------------
 countDensity(counts) + ggplot2::theme_bw() + ggplot2::ggtitle("Count Densities")
 
@@ -133,10 +113,8 @@ results.ma <- listResultsMA(results, alpha = 0.05)
 results.ma$combined
 
 ## ----plotSmear-----------------------------------------------------------
-genes.de.names <- rownames(results$edgeR)[results$edgeR$FDR < 0.05]
+genes.de.names <- rownames(tested$edgeR)[tested$edgeR$FDR < 0.05]
 edgeR::plotSmear(normalised$edgeR, de.tags = genes.de.names)
-
-rm(genes.de.names)
 
 ## ----volcano-------------------------------------------------------------
 volcanos <- listVolcano(results)
