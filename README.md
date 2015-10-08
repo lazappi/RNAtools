@@ -1,6 +1,5 @@
-<div style="text-align:center" markdown="1">
+
 ![RNAtools logo](vignettes/logo.png)
-</div>
 
 # RNAtools
 
