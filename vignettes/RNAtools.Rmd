@@ -1,6 +1,6 @@
 ---
 title: "RNAtools"
-author: "Luke Zappia"
+author: "Version 0.1.0"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
