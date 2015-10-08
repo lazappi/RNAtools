@@ -63,7 +63,10 @@ summarised counts for a group of samples and provides a unified interface for
 differential expression testing (using _edgeR_, _DESeq_, _DESeq2_ and
 _limma-voom_). The aim is allow simultaneous analysis using multiple packages 
 including robust quality control, easily comparable visulisations and
-combination of results.
+combination of results. The flow diagram below shows the basic workflow for
+RNAtools.
+
+![RNAtools workflow](workflow.png)
 
 Before we get started let's load the _RNAtools_ package:
 
