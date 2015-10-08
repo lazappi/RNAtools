@@ -1,4 +1,6 @@
 
+![DOI](https://zenodo.org/badge/18690/lazappi/RNAtools.svg)
+
 ![RNAtools logo](vignettes/logo.png)
 
 # RNAtools
